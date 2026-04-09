@@ -15,9 +15,14 @@ import { queryClient } from "./context/queryClient";
 import { SearchContextProvider } from "./context/searchContext";
 import { CartContextProvider } from "./context/cartContext";
 import { Toaster } from "@/components/ui/sonner";
-import Admin from "./pages/admin/admin";
+import Admin from "./pages/admin/dashboard";
 import Orders from "./pages/admin/order";
 import AdminLayout from "./pages/admin/layout";
+import Register from "./pages/user system/register";
+import Login from "./pages/user system/login";
+import Profile from "./pages/user system/profile";
+import { AuthProvider } from "./context/auth.context";
+import AdminRoute from "./pages/admin/adminRoute";
 
 export default function App() {
   const router = createBrowserRouter([
@@ -33,11 +38,19 @@ export default function App() {
         { path: "perfumes", element: <Perfumes /> },
         { path: "productdetails/:id", element: <ProductDetails /> },
         { path: "socks", element: <Socks /> },
+        { path: "register", element: <Register /> },
+        { path: "login", element: <Login /> },
+        { path: "profile", element: <Profile /> },
         {
           path: "/admin",
-          element: <AdminLayout />,
+          element: (
+            <AdminRoute>
+              <AdminLayout />
+            </AdminRoute>
+          ),
+
           children: [
-            { index: true, element: <Admin /> }, 
+            { index: true, element: <Admin /> },
             { path: "orders", element: <Orders /> },
           ],
         },
@@ -50,13 +63,15 @@ export default function App() {
   ]);
 
   return (
-    <CartContextProvider>
-      <SearchContextProvider>
-        <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router} />
-          <Toaster />
-        </QueryClientProvider>
-      </SearchContextProvider>
-    </CartContextProvider>
+    <AuthProvider>
+      <CartContextProvider>
+        <SearchContextProvider>
+          <QueryClientProvider client={queryClient}>
+            <RouterProvider router={router} />
+            <Toaster />
+          </QueryClientProvider>
+        </SearchContextProvider>
+      </CartContextProvider>
+    </AuthProvider>
   );
 }
