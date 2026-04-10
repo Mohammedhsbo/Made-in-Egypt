@@ -23,6 +23,7 @@ import Login from "./pages/user system/login";
 import Profile from "./pages/user system/profile";
 import { AuthProvider } from "./context/auth.context";
 import AdminRoute from "./pages/admin/adminRoute";
+import CreateProduct from "./pages/admin/createproduct";
 
 export default function App() {
   const router = createBrowserRouter([
@@ -51,6 +52,11 @@ export default function App() {
 
           children: [
             { index: true, element: <Admin /> },
+            { path: "createproduct", element: <CreateProduct /> },
+            {
+              path: "editproduct/:id",
+              element: <CreateProduct />,
+            },
             { path: "orders", element: <Orders /> },
           ],
         },

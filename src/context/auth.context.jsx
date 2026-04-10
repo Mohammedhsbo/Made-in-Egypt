@@ -9,19 +9,26 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 جلب المستخدم الحالي
-  const getMe = async () => {
-    try {
-      const res = await api.get("/auth/me");
-      setUser(res.data.data.user);
-    } catch (err) {
-      console.log(err)
 
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const getMe = async () => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    setUser(null);
+    setLoading(false);
+    return;
+  }
+
+  try {
+    const res = await api.get("/auth/me");
+    setUser(res.data.data.user);
+  } catch (err) {
+    console.log(err);
+    setUser(null);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     getMe();

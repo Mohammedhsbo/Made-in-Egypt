@@ -1,66 +1,62 @@
-import { Button } from '@/components/ui/button';
-import { useSearch } from '@/context/searchContext';
-import useProducts from '@/hooks/useProducts';
 import React from 'react';
-import { Link } from 'react-router-dom';
+import useProducts from '@/hooks/useProducts';
+import { useSearch } from '@/context/searchContext';
+import { Spinner } from '@/components/ui/spinner';
+import ProductCard from '../components/ui/ProductCard';
 
 export default function Perfumes() {
-  const { searchTerm } = useSearch();
   const { data, isLoading, error } = useProducts();
-const products = data?.data || [];
+  const { searchTerm } = useSearch();
+
+  const products = data?.data || [];
+
   const filteredProducts = products.filter(product =>
     product.subcategory?.some(sub => sub.name === "Men's Clothing")
   );
 
-  const displayedProducts = filteredProducts?.filter((p) =>
-    p.title.toLowerCase().includes(searchTerm?.toLowerCase() || "")
+  const displayedProducts = filteredProducts.filter(product =>
+    product.title.toLowerCase().includes(searchTerm?.toLowerCase() || "")
   );
 
-  // تحديد المنتجات اللي هتظهر
-  const productsToShow = searchTerm === "" ? filteredProducts : displayedProducts;
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen justify-center items-center">
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <h2 className="flex min-h-screen justify-center items-center text-red-700 text-3xl font-bold">
-        حدث خطأ اثناء تحميل المنتجات
-      </h2>
-    );
-  }
-
-  if (!productsToShow || productsToShow.length === 0) {
-    return (
-      <p className="flex min-h-screen justify-center items-center text-red-700 text-3xl font-bold">
-        لا يوجد منتجات
-      </p>
-    );
-  }
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 p-4">
-      {productsToShow.map((product) => (
-        <div key={product._id} className="border p-4 rounded-lg text-center hover:shadow-lg transition-shadow duration-300">
-          <img
-            src={product.images?.[0]}
-            alt={product.title}
-            className="w-full h-40 object-cover rounded mb-2"
-          />
-          <p className="mt-2 font-semibold">{product.title}</p>
-          <p className="text-gray-600 text-sm">{product.description}</p>
-          <p className="text-gray-600 font-bold">{product.price} EGP</p>
-          <Link to={`/productdetails/${product._id}`}>
-          <Button className="mt-4">اعرض المنتج</Button>
-          </Link>
-          
+    <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="mb-8 border-b pb-4">
+        <h1 className="text-3xl font-black text-slate-800">العطور</h1>
+        <p className="text-muted-foreground mt-2">تسوق أرقى العطور العالمية بأسعار لا تقبل المنافسة</p>
+      </div>
+
+      {isLoading && (
+        <div className="flex flex-col min-h-[40vh] justify-center items-center gap-4">
+          <Spinner className="w-12 h-12 text-primary" />
+          <p className="text-muted-foreground font-medium text-lg">جاري التحميل...</p>
         </div>
-      ))}
+      )}
+
+      {error && (
+        <div className="flex min-h-[40vh] justify-center items-center">
+          <div className="bg-red-50 text-red-600 px-6 py-4 rounded-xl border border-red-100 font-bold text-center">
+            حدث خطأ أثناء تحميل المنتجات.
+          </div>
+        </div>
+      )}
+
+      {!isLoading && !error && displayedProducts.length === 0 && (
+        <div className="flex flex-col min-h-[30vh] justify-center items-center gap-4 py-12">
+          <div className="bg-gray-50 rounded-full w-24 h-24 flex items-center justify-center mb-4 text-4xl">
+            ✨
+          </div>
+          <h3 className="text-2xl font-bold text-gray-700">لا يوجد منتجات</h3>
+          <p className="text-gray-500">عذراً، لا يوجد منتجات متاحة في هذا القسم حالياً.</p>
+        </div>
+      )}
+
+      {!isLoading && !error && displayedProducts.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          {displayedProducts.map(product => (
+            <ProductCard key={product._id} product={product} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,42 +1,22 @@
-import { Button } from '@/components/ui/button';
-import useProducts from '@/hooks/useProducts';
-import React from 'react';
-import { Link, useParams } from 'react-router-dom';
+import React from "react";
+import { useParams } from "react-router-dom";
+import useRelatedProducts from "@/hooks/useRelatedProducts";
+import ProductCard from "../components/ui/ProductCard";
 
-export default function Relatedproducts() {
-  const { data } = useProducts();
+export default function RelatedProducts() {
   const { id } = useParams();
-  
-  const gotoup = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }
+  const { data, loading } = useRelatedProducts(id);
 
-  
-  const currentProduct = data?.data?.find((p) => p._id === id);
-
-  // جلب المنتجات المشابهة
-  const relatedProducts = data?.data?.filter(
-    (p) =>
-      p.category?._id === currentProduct?.category?._id && p._id !== currentProduct?._id
-  );
+  if (loading) return <p>Loading...</p>;
+  if (!data?.length) return null;
 
   return (
-    <div className='mt-20'>
-      <h1 className='text-3xl font-bold text-center'>المنتجات المشابهة</h1>
-      <div className='grid grid-cols-2 md:grid-cols-3 gap-4 mt-6'>
-        {relatedProducts?.map((p) => (
-          <div key={p._id} className='border p-4 rounded-lg text-center'>
-            <img src={p.images[0]} alt={p.title} className='w-full h-40 object-cover rounded' />
-            <p className='mt-2 font-semibold'>{p.title}</p>
-            <p className='text-gray-600'>{p.price} EGP</p>
-            <p className='text-gray-600'> {p.category.name}</p>
-            <Button asChild variant='default' className='mt-2 w-full' onClick={gotoup}>
-                <Link to={`/productdetails/${p._id}`}> اعرض المنتج</Link>
-            </Button>
-          </div>
+    <div className="mt-10">
+      <h2 className="text-2xl font-bold mb-4">منتجات مشابهة</h2>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {data.map((product) => (
+          <ProductCard key={product._id} product={product} />
         ))}
       </div>
     </div>

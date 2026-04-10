@@ -2,93 +2,94 @@ import React from "react";
 import Logo from "../assets/logo.png";
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Menu, Search, ShoppingCart } from "lucide-react";
+import { Menu, LogIn, UserPlus, User } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/auth.context";
 
-export default function mobilenav() {
-  const navitems = [
-    { name: "الرئيسية", link: "/" },
-    { name: "العطور", link: "/perfumes" },
-    { name: "الملابس", link: "/clothes" },
-    { name: "الجوارب", link: "/socks" },
-    { name: "احذيه", link: "/shoes" },
-  ];
+export default function MobileNav({ navitems }) {
+  const { user } = useAuth();
+  
   return (
-    <nav className="flex justify-between items-center px-5 w-full fixed top-0 left-0 bg-white shadow-md z-10 md:hidden">
-      <Sheet className="flex flex-col justify-center items-center">
-        {/* Trigger */}
-        <SheetTrigger asChild>
-          <button>
-            <Menu
-              size={25}
-              className="hover:text-blue-600 transition-all duration-150 cursor-pointer"
-            />
-          </button>
-        </SheetTrigger>
+    <Sheet>
+      {/* Trigger */}
+      <SheetTrigger asChild>
+        <button className="p-2 -mr-2 text-gray-700 hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-lg">
+          <Menu size={28} />
+        </button>
+      </SheetTrigger>
 
-        {/* Sheet Content */}
-        <SheetContent side="right" className="flex flex-col items-center">
-          {/* Header for accessibility */}
-          <SheetHeader>
-            <SheetTitle>
-              {/* Title visible only to screen readers */}
-              <span className="sr-only">القائمة الرئيسية</span>
-            </SheetTitle>
-            <SheetDescription>
-              <span className="sr-only">اختر القسم الذي ترغب في تصفحه</span>
-            </SheetDescription>
-          </SheetHeader>
+      {/* Sheet Content */}
+      <SheetContent side="right" className="flex flex-col p-6 w-[80vw] sm:w-[350px]">
+        {/* Header for accessibility */}
+        <SheetHeader className="text-right">
+          <SheetTitle className="sr-only">القائمة الرئيسية</SheetTitle>
+          <SheetDescription className="sr-only">أقسام المتجر وحسابك</SheetDescription>
+        </SheetHeader>
 
-          {/* Logo */}
-          <div >
-            <img src={Logo} alt="شعار الموقع" className="w-[200px]" />
-          </div>
+        {/* Logo */}
+        <div className="flex justify-center border-b pb-6 mb-6">
+          <img src={Logo} alt="شعار الموقع" className="h-12 object-contain" />
+        </div>
 
-          {/* Links */}
-          <div className="mt-10 flex flex-col items-center gap-5 w-full">
-            {navitems.map((item, index) => (
-              <SheetTrigger asChild key={index}>
-                <Link
-                  to={item.link}
-                  className="text-gray-700 text-lg font-semibold hover:text-blue-600 transition-all duration-150 py-3 border-b w-full text-center"
-                >
-                  {item.name}
+        {/* Links */}
+        <div className="flex flex-col gap-4">
+          {navitems?.map((item, index) => (
+            <SheetTrigger asChild key={index}>
+              <Link
+                to={item.link}
+                className="text-gray-800 text-[17px] font-medium hover:text-primary hover:bg-gray-50 rounded-lg p-3 transition-colors text-right"
+              >
+                {item.name}
+              </Link>
+            </SheetTrigger>
+          ))}
+          {user?.role === "admin" && (
+            <SheetTrigger asChild>
+              <Link
+                to="/admin"
+                className="text-primary font-bold hover:text-primary/80 hover:bg-primary/5 rounded-lg p-3 transition-colors text-right"
+              >
+                لوحة التحكم
+              </Link>
+            </SheetTrigger>
+          )}
+        </div>
+
+        {/* Auth Section for Mobile */}
+        <div className="mt-auto pt-6 border-t border-gray-100 flex flex-col gap-3">
+          {!user ? (
+            <>
+              <SheetTrigger asChild>
+                <Link to="/login" className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">
+                  <LogIn size={20} />
+                  تسجيل الدخول
                 </Link>
               </SheetTrigger>
-            ))}
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      <div>
-        <img src={Logo} alt="logo image" className="w-[150px]   " />
-      </div>
-      <div className="flex gap-4 items-center">
-        <div className="relative w-full">
-          <input
-            type="text"
-            placeholder="ابحث عن منتجك المفضل"
-            className="w-[20px] h-8 border border-gray-300 rounded-md px-10 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-
-          <Search
-            size={18}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-          />
+              <SheetTrigger asChild>
+                <Link to="/register" className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors shadow-sm">
+                  <UserPlus size={20} />
+                  حساب جديد
+                </Link>
+              </SheetTrigger>
+            </>
+          ) : (
+             <SheetTrigger asChild>
+                <Link to="/profile" className="flex items-center gap-3 w-full py-3 px-4 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold transition-colors border border-gray-100">
+                  <div className="bg-primary/10 p-2 rounded-full text-primary">
+                    <User size={20} />
+                  </div>
+                  الملف الشخصي
+                </Link>
+              </SheetTrigger>
+          )}
         </div>
-        <ShoppingCart
-          size={25}
-          className=" hover:text-blue-600 transition-all duration-150 cursor-pointer"
-        />
-      </div>
-    </nav>
+      </SheetContent>
+    </Sheet>
   );
 }

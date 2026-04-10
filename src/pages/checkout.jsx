@@ -1,38 +1,40 @@
-import { useCart } from "../context/CartContext";
+import { useCart } from "../context/cartContext";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { CheckCircle2, ShoppingBag, CreditCard, MapPin, Phone, User, Mail, Navigation } from "lucide-react";
 
 const checkoutSchema = yup.object().shape({
-  fullName: yup.string().required("الاسم مطلوب"),
+  fullName: yup.string().required("الاسم بالكامل مطلوب"),
   email: yup
     .string()
-    .required("البريد مطلوب")
+    .required("البريد الإلكتروني مطلوب")
     .matches(
       /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-      "البريد الإلكتروني غير صحيح",
+      "البريد الإلكتروني غير صحيح"
     ),
   phone: yup
     .string()
     .required("رقم الهاتف مطلوب")
     .matches(
       /^(010|011|012|015)[0-9]{8}$/,
-      "رقم الهاتف يجب أن يكون 11 رقم ويبدأ بـ 010 أو 011 أو 012 أو 015",
+      "يجب أن يكون 11 رقم ويبدأ بـ 010,011,012,015"
     ),
-  address: yup.string().required("العنوان مطلوب"),
-  city: yup.string().required("المدينة مطلوبة"),
-  postalCode: yup.string().required("الرمز البريدي مطلوب"),
-  paymentMethod: yup.string().required("اختر طريقة الدفع"),
+  address: yup.string().required("العنوان التفصيلي مطلوب"),
+  city: yup.string().required("المحافظة/المدينة مطلوبة"),
+  postalCode: yup.string().required("الرمز البريدي مطلوب (يمكن ادخال 00000)"),
+  paymentMethod: yup.string().required("يجب اختيار طريقة دفع"),
   creditCardNumber: yup.string().when("paymentMethod", {
     is: "creditCard",
     then: () =>
       yup
         .string()
         .required("رقم البطاقة مطلوب")
-        .matches(/^[0-9]{16}$/, "رقم البطاقة يجب أن يكون 16 رقم"),
+        .matches(/^[0-9]{16}$/, "يجب أن يكون 16 رقم"),
+    otherwise: () => yup.string().notRequired(),
   }),
   cvv: yup.string().when("paymentMethod", {
     is: "creditCard",
@@ -40,17 +42,18 @@ const checkoutSchema = yup.object().shape({
       yup
         .string()
         .required("CVV مطلوب")
-        .matches(/^[0-9]{3}$/, "CVV يجب أن يكون 3 رقم"),
+        .matches(/^[0-9]{3}$/, "يجب أن يكون 3 أرقام"),
     otherwise: () => yup.string().notRequired(),
   }),
 });
 
 export default function Checkout() {
   const { cart, clearCart } = useCart();
+  const navigate = useNavigate();
 
   const total = cart.reduce(
     (sum, item) => sum + item.price * (item.quantity || 1),
-    0,
+    0
   );
 
   const {
@@ -58,281 +61,257 @@ export default function Checkout() {
     handleSubmit,
     watch,
     reset,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm({
     resolver: yupResolver(checkoutSchema),
-    defaultValues: {
-      fullName: "",
-      email: "",
-      phone: "",
-      address: "",
-      city: "",
-      postalCode: "",
-      paymentMethod: "order",
-      creditCardNumber: "",
-      cvv: "",
-    },
+    defaultValues: { paymentMethod: "order" },
   });
 
   const paymentMethod = watch("paymentMethod");
-const generateOrderMeta = () => {
-  const now = new Date();
 
-  const orderId =
-    "ORD-" +
-    now.getFullYear() +
-    (now.getMonth() + 1).toString().padStart(2, "0") +
-    now.getDate().toString().padStart(2, "0") +
-    "-" +
-    Math.floor(1000 + Math.random() * 9000);
+  const generateOrderMeta = () => {
+    const now = new Date();
+    const orderId =
+      "ORD-" +
+      now.getFullYear() +
+      (now.getMonth() + 1).toString().padStart(2, "0") +
+      now.getDate().toString().padStart(2, "0") +
+      "-" +
+      Math.floor(1000 + Math.random() * 9000);
+    const orderDate = now.toLocaleDateString("ar-EG");
+    const orderTime = now.toLocaleTimeString("ar-EG");
+    return { orderId, orderDate, orderTime };
+  };
 
-  const orderDate = now.toLocaleDateString("ar-EG");
-  const orderTime = now.toLocaleTimeString("ar-EG");
+  const sendWhatsApp = (data, orderDetails, meta) => {
+    const message = `
+*فاتورة طلب إلكتروني* 🛍️
 
-  return { orderId, orderDate, orderTime };
-};
+*رقم الطلب:* ${meta.orderId}
+*الإجمالي:* ${total} EGP
 
-const sendWhatsApp = (data, orderDetails, meta) => {
-  const message = `
-━━━━━━━━━━━━━━
-🧾 *فاتورة طلب جديد*
-━━━━━━━━━━━━━━
+*تفاصيل العميل:*
+الاسم: ${data.fullName}
+الهاتف: ${data.phone}
+العنوان: ${data.address} - ${data.city}
 
-🔢 *رقم الطلب:* ${meta.orderId}
-📅 *التاريخ:* ${meta.orderDate}
-⏰ *الوقت:* ${meta.orderTime}
-
-👤 *العميل:* ${data.fullName}
-📞 *الهاتف:* ${data.phone}
-📍 *العنوان:* ${data.address} - ${data.city}
-
-━━━━━━━━━━━━━━
-🛒 *المنتجات:*
-${orderDetails.split(" | ").map(i => `• ${i}`).join("\n")}
-
-━━━━━━━━━━━━━━
-💰 *الإجمالي:* ${total} جنيه
-━━━━━━━━━━━━━━
+*المنتجات:*
+${orderDetails.split(" | ").map(i => `▫️ ${i}`).join("\n")}
 `;
+    const encoded = encodeURIComponent(message);
+    window.open(`https://wa.me/201014625009?text=${encoded}`, "_blank");
+  };
 
-  const encoded = encodeURIComponent(message);
-  window.open(`https://wa.me/201014625009?text=${encoded}`, "_blank");
-};
+  const onSubmit = async (data) => {
+    if (cart.length === 0) return;
+    
+    const meta = generateOrderMeta();
+    const orderDetails = cart
+      .map((item) => `${item.title} (x${item.quantity || 1})`)
+      .join(" | ");
 
+    try {
+      await fetch("https://sheetdb.io/api/v1/g98ywcnp4enqr", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          data: [
+            {
+              orderId: meta.orderId,
+              date: meta.orderDate,
+              time: meta.orderTime,
+              fullName: data.fullName,
+              email: data.email,
+              phone: data.phone,
+              address: data.address,
+              city: data.city,
+              postalCode: data.postalCode,
+              total: total,
+              orderDetails: orderDetails,
+            },
+          ],
+        }),
+      });
 
+      toast.success("تم تأكيد الطلب بنجاح! شكراً لتسوقك معنا.", { duration: 5000 });
+      sendWhatsApp(data, orderDetails, meta);
+      clearCart();
+      reset();
+      navigate("/");
+    } catch (error) {
+      toast.error("عذراً، حدث خطأ أثناء إتمام الطلب.");
+    }
+  };
 
-
-const onSubmit = async (data) => {
-  const meta = generateOrderMeta();
-
-  const orderDetails = cart
-    .map(
-      (item) =>
-        `${item.title} x ${item.quantity || 1} = ${
-          item.price * (item.quantity || 1)
-        } جنيه`,
-    )
-    .join(" | ");
-
-  try {
-    await fetch("https://sheetdb.io/api/v1/g98ywcnp4enqr", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        data: [
-          {
-            orderId: meta.orderId,
-            date: meta.orderDate,
-            time: meta.orderTime,
-            fullName: data.fullName,
-            email: data.email,
-            phone: data.phone,
-            address: data.address,
-            city: data.city,
-            postalCode: data.postalCode,
-            total: total,
-            orderDetails: orderDetails,
-          },
-        ],
-      }),
-    });
-
-    toast.success("✅ تم حفظ الطلب وإرسال الفاتورة");
-    sendWhatsApp(data, orderDetails, meta);
-    clearCart();
-    reset();
-  } catch (error) {
-    toast.error("حدث خطأ أثناء حفظ الطلب");
-    console.log(error);
+  if (cart.length === 0) {
+    return (
+      <div className="flex flex-col min-h-[60vh] justify-center items-center text-center p-6">
+        <div className="bg-gray-50 p-6 rounded-full mb-6">
+           <ShoppingBag size={60} className="text-gray-300" />
+        </div>
+        <h2 className="text-3xl font-bold text-gray-800 mb-4">لا توجد منتجات للدفع!</h2>
+        <p className="text-gray-500 mb-8 text-lg">سلة مشترياتك فارغة، يرجى إضافة منتجات للمتابعة.</p>
+        <Link to="/">
+          <Button size="lg" className="rounded-full px-12 text-lg">العودة للتسوق</Button>
+        </Link>
+      </div>
+    );
   }
-};
 
+  const InputWrapper = ({ icon: Icon, error, children }) => (
+    <div className="relative group">
+      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors z-10">
+        <Icon size={20} />
+      </div>
+      {children}
+      {error && <p className="text-red-500 text-sm mt-1 px-2">{error}</p>}
+    </div>
+  );
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h2 className="text-4xl font-semibold mb-6 text-center">الدفع والشحن</h2>
+    <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 w-full">
+      <div className="mb-10 text-center">
+        <h2 className="text-3xl md:text-4xl font-black text-slate-800 tracking-tight">إتمام الطلب</h2>
+        <p className="text-muted-foreground mt-2 font-medium">الخطوة الأخيرة للحصول على منتجاتك</p>
+      </div>
 
-      <div className="flex flex-col md:flex-row gap-6">
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex-1 border p-6 rounded-lg shadow-sm space-y-4"
-        >
-          <h3 className="text-2xl font-semibold mb-4">معلومات الشحن</h3>
-
-          {/* الاسم */}
-          <input
-            type="text"
-            placeholder="الاسم بالكامل"
-            {...register("fullName")}
-            className="w-full p-2 border rounded"
-          />
-          {errors.fullName && (
-            <p className="text-red-500 text-sm">{errors.fullName.message}</p>
-          )}
-
-          {/* الإيميل */}
-          <input
-            type="email"
-            placeholder="البريد الإلكتروني"
-            {...register("email")}
-            className="w-full p-2 border rounded"
-          />
-          {errors.email && (
-            <p className="text-red-500 text-sm">{errors.email.message}</p>
-          )}
-
-          {/* الهاتف */}
-          <input
-            type="tel"
-            dir="rtl"
-            inputMode="numeric"
-            maxLength={11}
-            placeholder="رقم الهاتف"
-            {...register("phone")}
-            className="w-full p-2 border rounded"
-          />
-          {errors.phone && (
-            <p className="text-red-500 text-sm">{errors.phone.message}</p>
-          )}
-
-          {/* العنوان */}
-          <input
-            type="text"
-            placeholder="العنوان"
-            {...register("address")}
-            className="w-full p-2 border rounded"
-          />
-          {errors.address && (
-            <p className="text-red-500 text-sm">{errors.address.message}</p>
-          )}
-
-          {/* المدينة */}
-          <input
-            type="text"
-            placeholder="المدينة"
-            {...register("city")}
-            className="w-full p-2 border rounded"
-          />
-          {errors.city && (
-            <p className="text-red-500 text-sm">{errors.city.message}</p>
-          )}
-
-          {/* الرمز البريدي */}
-          <input
-            type="text"
-            inputMode="numeric"
-            placeholder="الرمز البريدي"
-            {...register("postalCode")}
-            className="w-full p-2 border rounded"
-          />
-          {errors.postalCode && (
-            <p className="text-red-500 text-sm">{errors.postalCode.message}</p>
-          )}
-
-          {/* الدفع */}
-          <select
-            {...register("paymentMethod")}
-            className="w-full p-2 border rounded"
-          >
-            <option value="order">الدفع عند الاستلام</option>
-            <option value="creditCard">بطاقة ائتمان</option>
-          </select>
-
-          {paymentMethod === "creditCard" && (
-            <>
-              <input
-                type="text"
-                placeholder="رقم البطاقة (16 رقم)"
-                {...register("creditCardNumber")}
-                className="w-full p-2 border rounded"
-              />
-              {errors.creditCardNumber && (
-                <p className="text-red-500 text-sm">
-                  {errors.creditCardNumber.message}
-                </p>
-              )}
-
-              <input
-                type="text"
-                placeholder="CVV (3 رقم)"
-                {...register("cvv")}
-                className="w-full p-2 border rounded"
-              />
-              {errors.cvv && (
-                <p className="text-red-500 text-sm">{errors.cvv.message}</p>
-              )}
-            </>
-          )}
-
-          <Button
-            type="submit"
-            className="w-full mt-4"
-            disabled={cart.length === 0}
-          >
-            اتمام الطلب
-          </Button>
-        </form>
-
-        {/* ملخص الطلب */}
-        <div className="flex-1 border p-6 rounded-lg shadow-sm">
-          <h3 className="text-2xl font-semibold mb-4">ملخص الطلب</h3>
-
-          {cart.length === 0 ? (
-            <div className="flex flex-col  gap-6 min-h-screen justify-center items-center text-red-700 text-3xl font-bold">
-              <p>السلة فارغة</p>
-              <Link to={`/`}>
-                <Button>اذهب للتسوق </Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {cart.map((item, index) => (
-                <div key={index} className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={item.images[0]}
-                      alt={item.title}
-                      className="h-16 w-16 object-cover rounded"
-                    />
-                    <span>
-                      {item.title} x {item.quantity || 1}
-                    </span>
-                  </div>
-                  <span>EGP{item.price * (item.quantity || 1)}</span>
+      <div className="flex flex-col-reverse lg:flex-row gap-8 lg:gap-12">
+        
+        {/* Checkout Form */}
+        <div className="lg:w-2/3">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+            
+            {/* Section: Contact Info */}
+            <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100">
+              <h3 className="text-xl font-bold mb-6 flex items-center gap-2 border-b pb-4">
+                <span className="bg-primary/10 text-primary w-8 h-8 rounded-full flex items-center justify-center text-sm">1</span>
+                المعلومات الشخصية
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <InputWrapper icon={User} error={errors.fullName?.message}>
+                  <input type="text" placeholder="الاسم بالكامل" {...register("fullName")} className={`w-full bg-gray-50 border ${errors.fullName ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-primary'} rounded-xl pl-4 pr-12 py-3.5 focus:outline-none focus:ring-2 focus:bg-white transition-all`} />
+                </InputWrapper>
+                <InputWrapper icon={Mail} error={errors.email?.message}>
+                  <input type="email" placeholder="البريد الإلكتروني" {...register("email")} className={`w-full bg-gray-50 border ${errors.email ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-primary'} rounded-xl pl-4 pr-12 py-3.5 focus:outline-none focus:ring-2 focus:bg-white transition-all`} />
+                </InputWrapper>
+                <div className="md:col-span-2">
+                  <InputWrapper icon={Phone} error={errors.phone?.message}>
+                    <input type="tel" dir="rtl" placeholder="رقم الهاتف الأساسي" {...register("phone")} className={`w-full bg-gray-50 border ${errors.phone ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-primary'} rounded-xl pl-4 pr-12 py-3.5 focus:outline-none focus:ring-2 focus:bg-white transition-all`} />
+                  </InputWrapper>
                 </div>
-              ))}
-
-              <hr />
-
-              <div className="flex justify-between font-semibold text-lg">
-                <span>الإجمالي:</span>
-                <span>EGP{total}</span>
               </div>
             </div>
-          )}
+
+            {/* Section: Shipping Info */}
+            <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100">
+              <h3 className="text-xl font-bold mb-6 flex items-center gap-2 border-b pb-4">
+                <span className="bg-primary/10 text-primary w-8 h-8 rounded-full flex items-center justify-center text-sm">2</span>
+                معلومات التوصيل
+              </h3>
+              <div className="space-y-5">
+                <InputWrapper icon={MapPin} error={errors.address?.message}>
+                  <input type="text" placeholder="العنوان التفصيلي (الشارع، رقم البناية، الخ)" {...register("address")} className={`w-full bg-gray-50 border ${errors.address ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-primary'} rounded-xl pl-4 pr-12 py-3.5 focus:outline-none focus:ring-2 focus:bg-white transition-all`} />
+                </InputWrapper>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <InputWrapper icon={Navigation} error={errors.city?.message}>
+                    <input type="text" placeholder="المدينة / المحافظة" {...register("city")} className={`w-full bg-gray-50 border ${errors.city ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-primary'} rounded-xl pl-4 pr-12 py-3.5 focus:outline-none focus:ring-2 focus:bg-white transition-all`} />
+                  </InputWrapper>
+                  <InputWrapper icon={CreditCard} error={errors.postalCode?.message}>
+                    <input type="text" placeholder="الرمز البريدي" {...register("postalCode")} className={`w-full bg-gray-50 border ${errors.postalCode ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-primary'} rounded-xl pl-4 pr-12 py-3.5 focus:outline-none focus:ring-2 focus:bg-white transition-all`} />
+                  </InputWrapper>
+                </div>
+              </div>
+            </div>
+
+            {/* Section: Payment Method */}
+            <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100">
+              <h3 className="text-xl font-bold mb-6 flex items-center gap-2 border-b pb-4">
+                <span className="bg-primary/10 text-primary w-8 h-8 rounded-full flex items-center justify-center text-sm">3</span>
+                طريقة الدفع
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <label className={`cursor-pointer border-2 rounded-2xl p-4 flex items-center gap-3 transition-all ${paymentMethod === 'order' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-primary/50'}`}>
+                   <input type="radio" value="order" {...register("paymentMethod")} className="w-5 h-5 accent-primary" />
+                   <span className="font-bold text-gray-700">الدفع نقداً عند الاستلام</span>
+                </label>
+                <label className={`cursor-pointer border-2 rounded-2xl p-4 flex items-center gap-3 transition-all opacity-70 ${paymentMethod === 'creditCard' ? 'border-primary bg-primary/5 opacity-100' : 'border-gray-200 hover:border-primary/50'}`}>
+                   <input type="radio" value="creditCard" {...register("paymentMethod")} className="w-5 h-5 accent-primary" />
+                   <span className="font-bold text-gray-700">الدفع بالبطاقة الائتمانية</span>
+                </label>
+              </div>
+
+              {paymentMethod === "creditCard" && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-4 border-t border-dashed">
+                  <div className="md:col-span-2">
+                    <InputWrapper icon={CreditCard} error={errors.creditCardNumber?.message}>
+                       <input type="text" placeholder="رقم البطاقة (16 رقم)" {...register("creditCardNumber")} className={`w-full bg-gray-50 border ${errors.creditCardNumber ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-primary'} rounded-xl pl-4 pr-12 py-3.5 focus:outline-none focus:ring-2 focus:bg-white transition-all text-left`} dir="ltr" />
+                    </InputWrapper>
+                  </div>
+                  <div>
+                    <InputWrapper icon={CheckCircle2} error={errors.cvv?.message}>
+                       <input type="text" placeholder="CVV" {...register("cvv")} className={`w-full bg-gray-50 border ${errors.cvv ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-primary'} rounded-xl pl-4 pr-12 py-3.5 focus:outline-none focus:ring-2 focus:bg-white transition-all text-left`} dir="ltr" />
+                    </InputWrapper>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Button type="submit" disabled={isSubmitting} className="w-full h-16 rounded-2xl text-xl font-bold bg-slate-900 hover:bg-slate-800 shadow-xl text-white transition-colors">
+              {isSubmitting ? (
+                "جاري المعالجة..."
+              ) : (
+                <>
+                  تأكيد الطلب 
+                  <span className="mr-2 px-3 py-1 bg-white/20 rounded-lg">{total} EGP</span>
+                </>
+              )}
+            </Button>
+          </form>
         </div>
+
+        {/* Order Summary */}
+        <div className="lg:w-1/3">
+          <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 md:p-8 sticky top-28">
+            <h3 className="text-xl font-bold mb-6 pb-4 border-b border-gray-200 flex items-center justify-between">
+              ملخص الطلب
+              <span className="text-sm font-medium bg-primary/10 text-primary px-3 py-1 rounded-full">{cart.length} منتجات</span>
+            </h3>
+
+            <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+              {cart.map((item, index) => (
+                <div key={index} className="flex items-center gap-4 bg-white p-3 rounded-2xl border border-gray-100 shadow-sm relative">
+                  <div className="relative">
+                    <img src={item.images?.[0]} alt={item.title} className="w-16 h-16 object-cover rounded-xl border border-gray-50" />
+                    <span className="absolute -top-2 -right-2 bg-slate-800 text-white w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold ring-2 ring-white">
+                      {item.quantity || 1}
+                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-sm text-slate-800 leading-tight mb-1 line-clamp-2">{item.title}</h4>
+                    <span className="text-primary font-bold text-sm">{item.price} EGP</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 space-y-3 pt-6 border-t border-gray-200">
+              <div className="flex justify-between text-gray-500 font-medium">
+                <span>المجموع</span>
+                <span>{total} EGP</span>
+              </div>
+              <div className="flex justify-between text-gray-500 font-medium">
+                <span>التوصيل</span>
+                <span className="text-green-600 font-bold">مجاناً</span>
+              </div>
+              <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+                <span className="text-lg font-bold text-slate-800">الإجمالي النهائي</span>
+                <span className="text-3xl font-black text-primary">{total} <span className="text-sm">EGP</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );

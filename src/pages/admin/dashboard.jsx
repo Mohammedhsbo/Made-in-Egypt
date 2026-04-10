@@ -1,33 +1,27 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useSearch } from "@/context/searchContext";
+import { Edit, Trash2, Package, Search, Plus } from "lucide-react";
+import api from "../../api/axios.base";
+import { useNavigate } from "react-router-dom";
+
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { searchTerm } = useSearch();
+  const { searchTerm, setSearchTerm } = useSearch();
+    const navigate = useNavigate();
 
-  
-  const filteredProducts =
-    searchTerm?.length > 0
-      ? products.filter((product) =>
-          product.title.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      : products;
-
- 
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const res = await axios.get(
-          "https://ecommerce.routemisr.com/api/v1/products"
-        );
-        setProducts(res.data.data);
+        const res = await api.get("/products");
+
+        setProducts(res.data.data.products); // ✅ FIX
       } catch (err) {
-        console.error(err);
         toast.error("فشل تحميل المنتجات");
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -36,85 +30,118 @@ export default function ProductsPage() {
     fetchProducts();
   }, []);
 
-  // تعديل (وهمي لأن API read-only)
-  async function editProducts(id) {
+  // ✅ search fix
+  const filteredProducts =
+    searchTerm?.length > 0
+      ? products.filter((product) =>
+          (product.title_ar || product.title_en)
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase())
+        )
+      : products;
+
+  async function deleteProduct(id) {
     try {
-      await axios.put(`https://ecommerce.routemisr.com/api/v1/products/${id}`);
-      toast.success("تم تحديث المنتج بنجاح");
+      await api.delete(`/products/${id}`);
+      toast.success("تم حذف المنتج");
+
+      setProducts((prev) => prev.filter((p) => p._id !== id));
     } catch (err) {
       console.error(err);
-      toast.error("فشل تحديث المنتج");
+      toast.error("فشل الحذف");
     }
   }
 
-  // حذف (local فقط)
-  async function deleteProduct(id) {
-     try{
-       await axios.delete(`https://ecommerce.routemisr.com/api/v1/products/${id}`);
-       toast.success("تم حذف المنتج بنجاح");
+//   async function editProducts(id, updatedData) {
+//   try {
+//     const res = await api.put(`/products/${id}`, updatedData);
 
-     }
-     catch(err){
-      console.error(err);
-      toast.error("فشل حذف المنتج");
-     }
-  }
-
-  // حالة التحميل
-  if (loading) {
-    return (
-      <p className="flex min-h-screen justify-center items-center text-xl font-bold">
-        جاري تحميل المنتجات...
-      </p>
-    );
-  }
-
-  // لا يوجد منتجات
-  if (filteredProducts.length === 0) {
-    return (
-      <p className="flex min-h-screen justify-center items-center text-xl font-bold">
-        لا يوجد منتجات
-      </p>
-    );
-  }
+//     console.log(res.data);
+//     toast.success("تم تحديث المنتج بنجاح");
+//   } catch (err) {
+//     console.error(err);
+//     toast.error("فشل تحديث المنتج");
+//   }
+// }
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6 text-center">
-        إدارة المنتجات
-      </h1>
+    <div className="w-full">
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {filteredProducts.map((product) => (
-          <div key={product._id} className="border p-4 rounded shadow">
-            <img
-              src={product.imageCover}
-              alt={product.title}
-              className="w-full h-48 object-cover rounded mb-2"
-            />
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">إدارة المنتجات</h1>
 
-            <h2 className="font-semibold">{product.title}</h2>
-            <p>السعر: EGP {product.price}</p>
-            <p>الكمية: {product.quantity}</p>
-
-            <div className="flex gap-2 mt-2">
-              <Button
-                className="bg-blue-500 hover:bg-blue-600"
-                onClick={() => editProducts(product._id)}
-              >
-                تعديل
-              </Button>
-
-              <Button
-                className="bg-red-500 hover:bg-red-600"
-                onClick={() => deleteProduct(product._id)}
-              >
-                حذف
-              </Button>
-            </div>
-          </div>
-        ))}
+        <Button onClick={() => (window.location.href = "/admin/createproduct")}>
+          <Plus className="w-4 h-4 ml-2" />
+          إضافة منتج
+        </Button>
       </div>
+
+      {/* Search */}
+      <div className="relative mb-6">
+        <Search className="absolute right-3 top-3 text-gray-400" />
+        <input
+          className="w-full border p-2 pr-10 rounded"
+          placeholder="بحث..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
+      {/* Loading */}
+      {loading ? (
+        <p>Loading...</p>
+      ) : filteredProducts.length === 0 ? (
+        <p>لا توجد منتجات</p>
+      ) : (
+        <div className="grid gap-4">
+
+          {filteredProducts.map((product) => (
+            <div
+              key={product._id}
+              className="border p-4 rounded flex justify-between items-center"
+            >
+
+              {/* Image */}
+              <img
+                src={product.imageCover}
+                className="w-16 h-16 object-cover rounded"
+              />
+
+              {/* Info */}
+              <div className="flex-1 px-4">
+                <h3 className="font-bold">
+                  {product.title_ar || product.title_en}
+                </h3>
+
+                <p className="text-sm text-gray-500">
+                  {product.basePrice} EGP
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2">
+
+               <button
+  onClick={() => navigate(`/admin/editproduct/${product._id}`)}
+  className="bg-indigo-50 text-indigo-600 p-2 rounded-lg"
+>
+  <Edit size={16} />
+</button>
+
+                <button
+                  onClick={() => deleteProduct(product._id)}
+                  className="p-2 bg-red-100 rounded"
+                >
+                  <Trash2 size={16} />
+                </button>
+
+              </div>
+            </div>
+          ))}
+
+        </div>
+      )}
     </div>
   );
 }

@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+
 import React from 'react'
+import api from '../api/axios.base';
 
 export default function useProductDetails(productId) {
     async function getProductDetails()
     {
-        let {data}= await axios.get(`https://ecommerce.routemisr.com/api/v1/products/${productId}`);
+        let {data}= await api.get(`/products/${productId}`);
         return data;
     }
     let response=useQuery({
