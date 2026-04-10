@@ -13,11 +13,11 @@ export function CartContextProvider({ children }) {
   }, [cart]);
   const addToCart = (product) => {
     setCart((prev) => {
-      const exist = prev.find((item) => item.id === product.id);
+      const exist = prev.find((item) => item._id === product._id);
 
       if (exist) {
         return prev.map((item) =>
-          item.id === product.id
+          item._id === product._id
             ? { ...item, quantity: item.quantity + 1 }
             : item,
         );
@@ -34,14 +34,14 @@ export function CartContextProvider({ children }) {
   const updateQuantity = (id, quantity) => {
     setCart((prev) =>
       prev.map((item) =>
-        item.id === id
+        item._id === id
           ? { ...item, quantity: quantity < 0 ? 0 : quantity }
           : item,
       ),
     );
   };
   const removeFromCart = (id) => {
-    setCart([...cart.filter((item) => item.id !== id)]);
+    setCart([...cart.filter((item) => item._id !== id)]);
   };
   const clearCart = () => {
     setCart([]);

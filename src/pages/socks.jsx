@@ -8,15 +8,17 @@ export default function Socks() {
   const { data, isLoading, error } = useProducts();
   const { searchTerm } = useSearch();
 
-  const products = data?.data || [];
+  const products = data?.data?.products || [];
 
-  const filteredProducts = products.filter(product =>
-    product.subcategory?.some(sub => sub.name === "Laptops & Accessories")
-  );
+  const filteredProducts = products.filter(product => {
+    const catName = product.category?.name_en || product.category?.name_ar || "";
+    return catName.toLowerCase().includes("sock") || catName.includes("جورب") || catName.includes("جوارب");
+  });
 
-  const displayedProducts = filteredProducts.filter(product =>
-    product.title.toLowerCase().includes(searchTerm?.toLowerCase() || "")
-  );
+  const displayedProducts = filteredProducts.filter(product => {
+    const title = product.title_ar || product.title_en || "";
+    return title.toLowerCase().includes(searchTerm?.toLowerCase() || "");
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">

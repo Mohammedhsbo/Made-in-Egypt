@@ -43,11 +43,20 @@ export default function Productdetails() {
   const category =
     product?.category?.name_en || product?.category?.name_ar || "";
 
+  const getImageUrl = (url) => {
+    if (!url) return "";
+    if (url.includes("drive.google.com")) {
+      const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (match) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    }
+    return url;
+  };
+
   const images =
     product?.images?.length > 0
-      ? product.images
+      ? product.images.map(getImageUrl)
       : product?.imageCover
-      ? [product.imageCover]
+      ? [getImageUrl(product.imageCover)]
       : [];
 
   // ===================== SLIDER SETTINGS =====================

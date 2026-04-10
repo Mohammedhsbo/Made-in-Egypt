@@ -104,7 +104,15 @@ export default function ProductsPage() {
 
               {/* Image */}
               <img
-                src={product.imageCover}
+                src={(() => {
+                  const url = product.imageCover;
+                  if (!url) return "";
+                  if (url.includes("drive.google.com")) {
+                    const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                    if (match) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+                  }
+                  return url;
+                })()}
                 className="w-16 h-16 object-cover rounded"
               />
 

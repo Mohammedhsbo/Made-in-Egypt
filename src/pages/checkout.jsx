@@ -52,7 +52,7 @@ export default function Checkout() {
   const navigate = useNavigate();
 
   const total = cart.reduce(
-    (sum, item) => sum + item.price * (item.quantity || 1),
+    (sum, item) => sum + (item.priceAfterDiscount || item.basePrice || 0) * (item.quantity || 1),
     0
   );
 
@@ -107,7 +107,7 @@ ${orderDetails.split(" | ").map(i => `▫️ ${i}`).join("\n")}
     
     const meta = generateOrderMeta();
     const orderDetails = cart
-      .map((item) => `${item.title} (x${item.quantity || 1})`)
+      .map((item) => `${item.title_ar || item.title_en || 'منتج'} (x${item.quantity || 1})`)
       .join(" | ");
 
     try {
@@ -282,14 +282,14 @@ ${orderDetails.split(" | ").map(i => `▫️ ${i}`).join("\n")}
               {cart.map((item, index) => (
                 <div key={index} className="flex items-center gap-4 bg-white p-3 rounded-2xl border border-gray-100 shadow-sm relative">
                   <div className="relative">
-                    <img src={item.images?.[0]} alt={item.title} className="w-16 h-16 object-cover rounded-xl border border-gray-50" />
+                    <img src={item.imageCover || item.images?.[0]} alt={item.title_ar || item.title_en} className="w-16 h-16 object-cover rounded-xl border border-gray-50" />
                     <span className="absolute -top-2 -right-2 bg-slate-800 text-white w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold ring-2 ring-white">
                       {item.quantity || 1}
                     </span>
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-bold text-sm text-slate-800 leading-tight mb-1 line-clamp-2">{item.title}</h4>
-                    <span className="text-primary font-bold text-sm">{item.price} EGP</span>
+                    <h4 className="font-bold text-sm text-slate-800 leading-tight mb-1 line-clamp-2">{item.title_ar || item.title_en}</h4>
+                     <span className="text-primary font-bold text-sm">{item.priceAfterDiscount || item.basePrice || 0} EGP</span>
                   </div>
                 </div>
               ))}

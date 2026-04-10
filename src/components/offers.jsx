@@ -7,6 +7,18 @@ export default function TodaysDealCard({ deals }) {
 
   // Let's pick a random product for the deal, or just the first one
   const product = deals[0];
+  const title = product?.title_ar || product?.title_en || "";
+  const description = product?.description_ar || product?.description_en || "";
+  const price = product?.priceAfterDiscount || product?.basePrice || 0;
+
+  const getImageUrl = (url) => {
+    if (!url) return "";
+    if (url.includes("drive.google.com")) {
+      const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (match) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    }
+    return url;
+  };
 
   return (
     <div className="relative bg-slate-900 rounded-[2rem] p-8 md:p-12 mb-16 overflow-hidden shadow-2xl">
@@ -22,20 +34,20 @@ export default function TodaysDealCard({ deals }) {
           </div>
 
           <h2 className="text-4xl md:text-5xl font-black leading-tight text-white">
-            {product.title}
+            {title}
           </h2>
 
           <p className="text-slate-300 text-lg leading-relaxed max-w-lg">
-            {product.description?.slice(0, 150)}...
+            {description?.slice(0, 150)}{description?.length > 150 ? '...' : ''}
           </p>
 
           <div className="flex items-center gap-6 mt-4">
             <div className="flex flex-col">
               <span className="text-slate-400 text-sm font-medium mb-1 line-through">
-                {(product.price * 1.3).toFixed(2)} EGP
+                {(price * 1.3).toFixed(2)} EGP
               </span>
               <span className="text-4xl font-black text-white">
-                {product.price} <span className="text-xl font-medium text-slate-300">EGP</span>
+                {price} <span className="text-xl font-medium text-slate-300">EGP</span>
               </span>
             </div>
             
@@ -58,8 +70,8 @@ export default function TodaysDealCard({ deals }) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-3xl z-10 pointer-events-none hidden md:block"></div>
           <div className="relative w-[280px] h-[280px] md:w-[380px] md:h-[380px] bg-white rounded-3xl shadow-xl overflow-hidden group-hover:-translate-y-2 transition-transform duration-500 border border-white/10">
             <img
-              src={product.imageCover || product.images?.[0]}
-              alt={product.title}
+              src={getImageUrl(product.imageCover) || getImageUrl(product.images?.[0])}
+              alt={title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
           </div>

@@ -3,9 +3,19 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 export default function ProductCard({ product }) {
- const image = product?.imageCover?.includes("drive")
-  ? product.imageCover.replace("/view?usp=drive_link", "uc?export=view")
-  : product?.imageCover || product?.images?.[0];
+  const getImageUrl = (url) => {
+    if (!url) return "";
+    if (url.includes("drive.google.com")) {
+      // Extract file ID from various Google Drive URL formats
+      const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (match) {
+        return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+      }
+    }
+    return url;
+  };
+
+  const image = getImageUrl(product?.imageCover) || getImageUrl(product?.images?.[0]);
 
   const title =
     product?.title_en ||

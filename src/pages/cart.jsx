@@ -7,7 +7,7 @@ export default function Cart() {
   const { cart, removeFromCart, clearCart, updateQuantity } = useCart();
 
   const total = cart.reduce(
-    (sum, item) => sum + item.price * (item.quantity || 1),
+    (sum, item) => sum + (item.priceAfterDiscount || item.basePrice || 0) * (item.quantity || 1),
     0
   );
 
@@ -60,16 +60,16 @@ export default function Cart() {
                   <div className="flex items-center gap-4 w-full md:w-1/2">
                     <div className="w-24 h-24 bg-gray-50 rounded-2xl flex-shrink-0 border border-gray-100 overflow-hidden">
                       <img
-                        src={item.images?.[0]}
-                        alt={item.title}
+                        src={item.imageCover || item.images?.[0]}
+                        alt={item.title_ar || item.title_en || "منتج"}
                         className="w-full h-full object-cover mix-blend-multiply"
                       />
                     </div>
                     <div>
-                      <Link to={`/productdetails/${item.id}`} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors line-clamp-2 leading-tight mb-2">
-                        {item.title}
+                      <Link to={`/productdetails/${item._id}`} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors line-clamp-2 leading-tight mb-2">
+                        {item.title_ar || item.title_en}
                       </Link>
-                      <p className="text-sm font-medium text-gray-500">{item.category?.name}</p>
+                      <p className="text-sm font-medium text-gray-500">{item.category?.name_ar || item.category?.name_en || ""}</p>
                     </div>
                   </div>
 
@@ -78,14 +78,14 @@ export default function Cart() {
                     <span className="md:hidden font-semibold text-gray-500">الكمية:</span>
                     <div className="flex items-center bg-gray-50 border border-gray-200 rounded-full h-10 w-[110px]">
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        onClick={() => updateQuantity(item._id, item.quantity - 1)}
                         className="w-10 h-10 flex items-center justify-center text-gray-600 hover:text-primary transition-colors focus:outline-none rounded-r-full"
                       >
                         <Minus size={16} />
                       </button>
                       <span className="flex-1 text-center font-bold text-sm bg-white border-x border-gray-200 h-full flex items-center justify-center">{item.quantity || 1}</span>
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(item._id, item.quantity + 1)}
                         className="w-10 h-10 flex items-center justify-center text-gray-600 hover:text-primary transition-colors focus:outline-none rounded-l-full"
                       >
                         <Plus size={16} />
@@ -97,14 +97,14 @@ export default function Cart() {
                   <div className="w-full md:w-auto md:flex-1 flex justify-between md:justify-center items-center">
                     <span className="md:hidden font-semibold text-gray-500">السعر:</span>
                     <p className="font-bold text-lg text-slate-800">
-                      {item.price * (item.quantity || 1)} <span className="text-sm text-gray-400">EGP</span>
+                      {(item.priceAfterDiscount || item.basePrice || 0) * (item.quantity || 1)} <span className="text-sm text-gray-400">EGP</span>
                     </p>
                   </div>
 
                   {/* Remove Button */}
                   <div className="absolute left-6 top-6 md:relative md:left-0 md:top-0 w-auto">
                     <button
-                      onClick={() => removeFromCart(item.id)}
+                      onClick={() => removeFromCart(item._id)}
                       className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-full transition-all focus:outline-none"
                       title="إزالة المنتج"
                     >

@@ -13,7 +13,7 @@ export default function useRelatedProducts(id) {
       try {
         setLoading(true);
 
-        const res = await api.get(`/product/related/${id}`);
+        const res = await api.get(`/products/related/${id}`);
 
         setData(res.data.data.products || res.data.data || []);
       } catch (err) {
