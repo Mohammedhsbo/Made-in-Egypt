@@ -9,6 +9,7 @@ import "slick-carousel/slick/slick-theme.css";
 import Relatedproducts from "./relatedproducts";
 import { Award, Repeat, Truck, ShoppingCart, Info } from "lucide-react";
 import { useCart } from "@/context/cartContext";
+import Reviews from "./reveiw/reveiw";
 
 export default function Productdetails() {
   const { id } = useParams();
@@ -196,12 +197,15 @@ export default function Productdetails() {
           </div>
         </div>
       )}
-
+      
       {/* RELATED */}
       <div className="mt-20">
         <Relatedproducts />
       </div>
-
+      {/* REVIEWS */}
+      <div className="mt-20">
+        <Reviews />
+      </div>
     </div>
   );
 }

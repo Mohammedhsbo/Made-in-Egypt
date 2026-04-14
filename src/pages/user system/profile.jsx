@@ -3,6 +3,7 @@ import { useAuth } from "../../context/auth.context";
 import api from "../../api/axios.base";
 import { Button } from "@/components/ui/button";
 import { User, LogOut, Mail, Clock, ShoppingBag } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Profile() {
   const { logout } = useAuth();
@@ -17,6 +18,7 @@ export default function Profile() {
         const res = await api.get("/auth/me");
         setUser(res.data.data.user);
       } catch (err) {
+        console.log(err);
         setError("فشل تحميل بيانات المستخدم، يرجى تسجيل الدخول مجدداً");
       } finally {
         setLoading(false);
@@ -79,7 +81,8 @@ export default function Profile() {
                 <span dir="ltr">{user?.email}</span>
               </div>
             </div>
-             <Button
+           <div className="flex items-center gap-4">
+              <Button
                 onClick={handleLogout}
                 variant="outline"
                 className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 rounded-xl h-12 px-6 gap-2 font-bold shadow-sm"
@@ -87,6 +90,18 @@ export default function Profile() {
                 <LogOut size={18} />
                 تسجيل الخروج
               </Button>
+              <Button
+                asChild
+                variant="default"
+                className=" border-primary hover:bg-primary/60 rounded-xl h-12 px-6 gap-2 font-bold shadow-sm"
+              >
+                <Link to="/my-orders">
+                  <ShoppingBag size={18} />
+                  تتبع الأوردرات
+                </Link>
+              </Button>
+              
+           </div>
           </div>
 
           {/* User Details Grid */}

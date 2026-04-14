@@ -1,58 +1,103 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
+import api from "../api/axios.base";
+
 const CartContext = createContext();
 
 export function CartContextProvider({ children }) {
-  const [cart, setCart] = useState(() => {
-    const savedCart = localStorage.getItem("cart");
-    return savedCart ? JSON.parse(savedCart) : [];
-  });
+  const [cart, setCart] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
-  const addToCart = (product) => {
-    setCart((prev) => {
-      const exist = prev.find((item) => item._id === product._id);
-
-      if (exist) {
-        return prev.map((item) =>
-          item._id === product._id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item,
-        );
-      }
-
-      return [...prev, { ...product, quantity: 1 }];
-    });
-    if (cart) {
-      toast.success("تم اضافة المنتج الى السلة");
-    } else {
-      toast.error("لم يتم اضافة المنتج الى السلة");
+  // ================= GET CART =================
+  const getCart = async () => {
+    try {
+      const res = await api.get("/cart");
+      setCart(res.data.data.cart || []);
+    } catch (err) {
+      console.log(err);
+      toast.error("فشل تحميل السلة");
+    } finally {
+      setLoading(false);
     }
   };
-  const updateQuantity = (id, quantity) => {
-    setCart((prev) =>
-      prev.map((item) =>
-        item._id === id
-          ? { ...item, quantity: quantity < 0 ? 0 : quantity }
-          : item,
-      ),
-    );
+
+  useEffect(() => {
+    getCart();
+  }, []);
+
+  // ================= ADD TO CART =================
+  const addToCart = async (product) => {
+    try {
+      const res = await api.post("/cart", {
+        productId: product._id,
+        quantity: 1,
+      });
+
+      setCart(res.data.data.cart);
+      toast.success("تم إضافة المنتج للسلة");
+    } catch (err) {
+      console.log(err);
+      toast.error("فشل إضافة المنتج");
+    }
   };
-  const removeFromCart = (id) => {
-    setCart([...cart.filter((item) => item._id !== id)]);
+
+  // ================= UPDATE QUANTITY =================
+  const updateQuantity = async (id, quantity) => {
+  try {
+    // منع النزول أقل من 1
+    const safeQuantity = Math.max(1, quantity);
+
+    const res = await api.put(`/cart/${id}`, {
+      quantity: safeQuantity,
+    });
+
+    setCart(res.data.data.cart);
+  } catch (err) {
+    console.log(err);
+    toast.error("فشل تحديث الكمية");
+  }
+};
+
+  // ================= REMOVE =================
+  const removeFromCart = async (id) => {
+    try {
+      const res = await api.delete(`/cart/${id}`);
+
+      setCart(res.data.data.cart);
+      toast.success("تم حذف المنتج");
+    } catch (err) {
+      console.log(err);
+      toast.error("فشل الحذف");
+    }
   };
-  const clearCart = () => {
-    setCart([]);
+
+  // ================= CLEAR =================
+  const clearCart = async () => {
+    try {
+      await api.delete("/cart");
+
+      setCart([]);
+      toast.success("تم تفريغ السلة");
+    } catch (err) {
+      console.log(err);
+      toast.error("فشل تفريغ السلة");
+    }
   };
 
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, removeFromCart, clearCart, updateQuantity }}
+      value={{
+        cart,
+        loading,
+        addToCart,
+        removeFromCart,
+        clearCart,
+        updateQuantity,
+      }}
     >
       {children}
     </CartContext.Provider>
   );
 }
+
 export const useCart = () => useContext(CartContext);

@@ -7,12 +7,16 @@ import { useAuth } from "../context/auth.context";
 import { useCart } from "../context/cartContext";
 import { Button } from "@/components/ui/button";
 
+
 export default function Header() {
   const { searchTerm, setSearchTerm } = useSearch();
   const { user } = useAuth();
   const { cart } = useCart();
   
-  const cartItemsCount = cart?.reduce((acc, item) => acc + item.quantity, 0) || 0;
+ const cartItemsCount = cart?.items?.reduce(
+  (acc, item) => acc + item.quantity,
+  0
+) || 0;
 
   const navitems = [
     { name: "الرئيسية", link: "/" },

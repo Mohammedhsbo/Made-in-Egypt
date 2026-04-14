@@ -139,6 +139,10 @@ export default function CreateProduct() {
         </button>
 
       </form>
+      
+      <div>
+       
+      </div>
     </div>
   );
 }

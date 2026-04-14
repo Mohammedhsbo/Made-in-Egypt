@@ -21,9 +21,18 @@ import AdminLayout from "./pages/admin/layout";
 import Register from "./pages/user system/register";
 import Login from "./pages/user system/login";
 import Profile from "./pages/user system/profile";
+import MyOrders from "./pages/user system/userorders";
 import { AuthProvider } from "./context/auth.context";
 import AdminRoute from "./pages/admin/adminRoute";
 import CreateProduct from "./pages/admin/createproduct";
+import CreateCategory from "./pages/admin/createcategory";
+import Mangenecategory from "./pages/admin/magnecategory";
+import EditCategory from "./pages/admin/editcategory";
+import Allcuppons from "./pages/admin/allcuppons";
+import Creaatecuppons from "./pages/admin/createcuppon";
+import Editcoupons from "./pages/admin/editcoupons";
+
+
 
 export default function App() {
   const router = createBrowserRouter([
@@ -42,6 +51,7 @@ export default function App() {
         { path: "register", element: <Register /> },
         { path: "login", element: <Login /> },
         { path: "profile", element: <Profile /> },
+        { path: "my-orders", element: <MyOrders /> },
         {
           path: "/admin",
           element: (
@@ -57,7 +67,20 @@ export default function App() {
               path: "editproduct/:id",
               element: <CreateProduct />,
             },
+            { path: "managecategories", element: < Mangenecategory/> },
+            {path: "editcategory/:id", element: <EditCategory /> },
+            {path:"createcategory", element: <CreateCategory />},
             { path: "orders", element: <Orders /> },
+            {path:"create-cuppons", element: <Creaatecuppons />},
+            {
+              path: "allcuppons",
+              element: <Allcuppons />,
+            }
+            ,
+            {
+              path: "edit-cuppons/:id",
+              element: <Editcoupons />,
+            }
           ],
         },
       ],
