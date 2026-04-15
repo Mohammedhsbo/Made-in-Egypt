@@ -2,7 +2,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 
 import ProductCard from "../components/ui/ProductCard";
-import useRelatedProducts from "../hooks/useRelatedProducts";
+import useRelatedProducts from "../hooks/useRelatedproducts";
 
 export default function RelatedProducts() {
   const { id } = useParams();
