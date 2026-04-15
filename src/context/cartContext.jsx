@@ -13,9 +13,10 @@ export function CartContextProvider({ children }) {
     try {
       const res = await api.get("/cart");
       setCart(res.data.data.cart || []);
+     
     } catch (err) {
       console.log(err);
-      toast.error("فشل تحميل السلة");
+      toast.error("يجب تسجيل الدخول");
     } finally {
       setLoading(false);
     }

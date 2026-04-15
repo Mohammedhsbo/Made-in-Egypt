@@ -1,7 +1,7 @@
 import { useCart } from "../context/cartContext";
 import { useAuth } from "../context/auth.context";
 import { Button } from "@/components/ui/button";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ import {
   Navigation,
 } from "lucide-react";
 import api from "../api/axios.base";
+import { useState } from "react";
 
 const checkoutSchema = yup.object().shape({
   fullName: yup.string().required("الاسم بالكامل مطلوب"),
@@ -62,18 +63,23 @@ export default function Checkout() {
   const { cart, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [couponCode, setCouponCode] = useState("");
+const [discount, setDiscount] = useState(0);
+
 
   // Cart from backend is an object { items: [...], ... }
   const items = cart?.items || [];
+const SHIPPING_FEE = items.length > 0 ? 75 : 0;
+   const total = Array.isArray(items)
+    ? items.reduce((sum, item) => {
+        const price =
+          item.price ||
+          0;
 
-  const total = cart?.total || items.reduce(
-    (sum, item) =>
-      sum +
-      (item.product?.priceAfterDiscount || item.product?.basePrice || 0) *
-        (item.quantity || 1),
-    0
-  );
-
+        return sum + price * (item.quantity || 1);
+      }, 0)
+    : 0;
+const [finalTotal, setFinalTotal] = useState(total);
   const {
     register,
     handleSubmit,
@@ -84,6 +90,23 @@ export default function Checkout() {
     resolver: yupResolver(checkoutSchema),
     defaultValues: { paymentMethod: "cash" },
   });
+  //apply discount
+const handleApplyCoupon = async () => {
+  try {
+    const res = await api.patch("/cart/apply-coupon", {
+      code: couponCode,
+    });
+
+    const cart = res.data.data.cart;
+
+    toast.success("تم تطبيق الكوبون بنجاح ");
+
+    setFinalTotal(cart.totalPriceAfterDiscount+SHIPPING_FEE);
+
+  } catch (error) {
+    toast.error(error.response?.data?.message || "كوبون غير صالح");
+  }
+};
 
   const paymentMethod = watch("paymentMethod");
 
@@ -99,7 +122,7 @@ export default function Checkout() {
     const message = `
 *طلب جديد* 🛍️
 
-*الإجمالي:* ${total} EGP
+*الإجمالي:* ${finalTotal} EGP
 
 *تفاصيل العميل:*
 الاسم: ${data.fullName}
@@ -134,7 +157,7 @@ ${itemsText}
           postalCode: data.postalCode,
         },
         paymentMethod: data.paymentMethod === "creditCard" ? "card" : "cash",
-        totalPrice: total,
+        totalPrice: finalTotal,
         items: items.map((item) => ({
           product: item.product?._id || item.product?.id || item.product,
           quantity: item.quantity || 1,
@@ -376,7 +399,7 @@ ${itemsText}
                 <>
                   تأكيد الطلب
                   <span className="mr-2 px-3 py-1 bg-white/20 rounded-lg">
-                    {total} EGP
+                    {finalTotal} EGP
                   </span>
                 </>
               )}
@@ -432,18 +455,38 @@ ${itemsText}
             <div className="mt-8 space-y-3 pt-6 border-t border-gray-200">
               <div className="flex justify-between text-gray-500 font-medium">
                 <span>المجموع</span>
-                <span>{total.toFixed(2)} EGP</span>
+                <span>
+                  {
+                  total.toFixed(2)
+                  } EGP</span>
               </div>
               <div className="flex justify-between text-gray-500 font-medium">
                 <span>التوصيل</span>
-                <span className="text-green-600 font-bold">مجاناً</span>
+                <span className="text-green-600 font-bold">75</span>
               </div>
+              <div className="mb-4 flex gap-2">
+  <input
+    type="text"
+    placeholder="كود الخصم"
+    value={couponCode}
+    onChange={(e) => setCouponCode(e.target.value)}
+    className="flex-1 border p-2 rounded-xl"
+  />
+
+  <button
+    type="button"
+    onClick={handleApplyCoupon}
+    className="bg-black text-white px-4 rounded-xl"
+  >
+    تطبيق
+  </button>
+</div>
               <div className="flex justify-between items-center pt-4 border-t border-gray-200">
                 <span className="text-lg font-bold text-slate-800">
                   الإجمالي النهائي
                 </span>
                 <span className="text-3xl font-black text-primary">
-                  {total.toFixed(2)}{" "}
+                  {(finalTotal+SHIPPING_FEE).toFixed(2)}{" "}
                   <span className="text-sm">EGP</span>
                 </span>
               </div>

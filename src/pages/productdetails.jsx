@@ -1,6 +1,6 @@
 import useProductDetails from "@/hooks/useProductDetails";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import Slider from "react-slick";
@@ -10,11 +10,14 @@ import Relatedproducts from "./relatedproducts";
 import { Award, Repeat, Truck, ShoppingCart, Info } from "lucide-react";
 import { useCart } from "@/context/cartContext";
 import Reviews from "./reveiw/reveiw";
+import { useAuth } from "../context/auth.context";
+import { toast } from "sonner";
 
 export default function Productdetails() {
   const { id } = useParams();
   const { data, isLoading, error } = useProductDetails(id);
   const { addToCart } = useCart();
+  const { user } = useAuth();
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
@@ -37,8 +40,7 @@ export default function Productdetails() {
 
   // ===================== NORMALIZE DATA =====================
   const title = product?.title_en || product?.title_ar || "";
-  const description =
-    product?.description_en || product?.description_ar || "";
+  const description = product?.description_en || product?.description_ar || "";
   const price = product?.priceAfterDiscount || product?.basePrice || 0;
 
   const category =
@@ -48,7 +50,8 @@ export default function Productdetails() {
     if (!url) return "";
     if (url.includes("drive.google.com")) {
       const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-      if (match) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+      if (match)
+        return `https://drive.google.com/uc?export=view&id=${match[1]}`;
     }
     return url;
   };
@@ -57,8 +60,8 @@ export default function Productdetails() {
     product?.images?.length > 0
       ? product.images.map(getImageUrl)
       : product?.imageCover
-      ? [getImageUrl(product.imageCover)]
-      : [];
+        ? [getImageUrl(product.imageCover)]
+        : [];
 
   // ===================== SLIDER SETTINGS =====================
   const sliderSettings = {
@@ -87,7 +90,6 @@ export default function Productdetails() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
-
       {/* LOADING */}
       {isLoading && (
         <div className="flex flex-col min-h-[60vh] justify-center items-center gap-4">
@@ -99,13 +101,10 @@ export default function Productdetails() {
       {/* PRODUCT */}
       {!isLoading && product && (
         <div className="bg-white rounded-3xl p-6 lg:p-10 shadow-sm border">
-
           <div className="flex flex-col lg:flex-row gap-12">
-
             {/* IMAGE */}
             <div className="w-full lg:w-5/12">
               <div className="bg-gray-50 rounded-3xl p-6 border relative">
-
                 <span className="absolute top-4 right-4 bg-white px-3 py-1 text-xs rounded-full shadow">
                   {category}
                 </span>
@@ -126,7 +125,6 @@ export default function Productdetails() {
 
             {/* INFO */}
             <div className="w-full lg:w-7/12 flex flex-col gap-6">
-
               <h1 className="text-3xl font-black">{title}</h1>
 
               <div className="flex items-center gap-4">
@@ -148,7 +146,6 @@ export default function Productdetails() {
 
               {/* QUANTITY */}
               <div className="bg-gray-50 p-4 rounded-2xl flex items-center gap-4">
-
                 <div className="flex items-center border rounded-full bg-white">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -167,14 +164,27 @@ export default function Productdetails() {
                   </button>
                 </div>
 
+                {/* {!user ? (
+                  <Link
+                    to="/login"
+                    className="bg-primary text-white px-4 py-2 rounded-full"
+                  >
+                    سجل الدخول للحصول على المنتج
+                  </Link>
+                ) : ( */}
                 <Button
                   className="flex-1 flex gap-2"
-                  onClick={() =>
+                  onClick={() => {
+                    if (!user) {
+                      toast.info(
+                        "يمكنك التصفح بدون تسجيل، لكن التسجيل يحفظ سلتك",
+                      );
+                    }
                     addToCart({
                       ...product,
                       selectedQuantity: quantity,
-                    })
-                  }
+                    });
+                  }}
                 >
                   <ShoppingCart size={18} />
                   إضافة للسلة
@@ -197,7 +207,7 @@ export default function Productdetails() {
           </div>
         </div>
       )}
-      
+
       {/* RELATED */}
       <div className="mt-20">
         <Relatedproducts />
