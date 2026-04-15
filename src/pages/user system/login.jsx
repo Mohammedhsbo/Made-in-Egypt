@@ -2,15 +2,19 @@ import React, { useState } from "react";
 import { loginSchema } from "../../../utils/schmea.validation";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import api from "../../api/axios.base";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Mail, Lock, LogIn, Store } from "lucide-react";
+import { useAuth } from "@/context/auth.context";
+import { loginRequest, meRequest } from "@/services/auth.service";
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { login } = useAuth();
 
   const {
     register,
@@ -25,16 +29,22 @@ export default function Login() {
     setError(null);
 
     try {
-      const res = await api.post("/auth/login", {
+      const res = await loginRequest({
         email: data.email,
         password: data.password,
       });
       localStorage.setItem("token", res.data.token);
-     
-      toast.success(res.data.message || "تم تسجيل الدخول بنجاح!");
-       
 
-      window.location.href = "/";
+      try {
+        const meRes = await meRequest();
+        login(meRes?.data?.data?.user || null);
+      } catch (meErr) {
+        console.log("Get me after login failed:", meErr);
+      }
+
+      toast.success(res.data.message || "تم تسجيل الدخول بنجاح!");
+      const redirect = searchParams.get("redirect");
+      navigate(redirect || "/", { replace: true });
     } catch (err) {
       if (err.response?.status === 401) {
         setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
@@ -98,9 +108,12 @@ export default function Login() {
 
           <div className="flex items-center justify-between">
             <div className="text-sm">
-              <a href="#" className="font-semibold text-primary hover:text-primary/80 transition-colors">
+              <Link
+                to="/forgot-password"
+                className="font-semibold text-primary hover:text-primary/80 transition-colors"
+              >
                 نسيت كلمة المرور؟
-              </a>
+              </Link>
             </div>
           </div>
 

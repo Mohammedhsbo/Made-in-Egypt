@@ -1,21 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import SafeImage from "@/components/ui/safe-image";
+import { getProductImageUrl } from "@/utils/formatImageUrl";
+
 
 export default function ProductCard({ product }) {
-  const getImageUrl = (url) => {
-    if (!url) return "";
-    if (url.includes("drive.google.com")) {
-      // Extract file ID from various Google Drive URL formats
-      const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-      if (match) {
-        return `https://drive.google.com/uc?export=view&id=${match[1]}`;
-      }
-    }
-    return url;
-  };
+  const image = getProductImageUrl(product);
 
-  const image = getImageUrl(product?.imageCover) || getImageUrl(product?.images?.[0]);
 
   const title =
     product?.title_en ||
@@ -35,7 +27,7 @@ export default function ProductCard({ product }) {
         to={`/productdetails/${product?._id}`}
         className="block relative aspect-square overflow-hidden bg-gray-50"
       >
-        <img
+        <SafeImage
           src={image}
           alt={title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"

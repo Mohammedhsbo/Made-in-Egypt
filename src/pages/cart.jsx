@@ -2,9 +2,13 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "../context/cartContext";
 import { Link } from "react-router-dom";
 import { Trash2, ShoppingBag, Minus, Plus, CreditCard } from "lucide-react";
+import SafeImage from "@/components/ui/safe-image";
+import { getProductImageUrl } from "@/utils/formatImageUrl";
+import { useAuth } from "../context/auth.context";
 
 export default function Cart() {
   const { cart, removeFromCart, clearCart, updateQuantity } = useCart();
+  const { user } = useAuth();
 
   const items = cart?.items || [];
 
@@ -12,6 +16,8 @@ export default function Cart() {
     ? items.reduce((sum, item) => {
         const price =
           item.price ||
+          item.product?.priceAfterDiscount ||
+          item.product?.basePrice ||
           0;
 
         return sum + price * (item.quantity || 1);
@@ -78,11 +84,8 @@ export default function Cart() {
                   {/* PRODUCT */}
                   <div className="flex items-center gap-4 w-full md:w-1/2">
                     <div className="w-24 h-24 bg-gray-50 rounded-2xl flex-shrink-0 border border-gray-100 overflow-hidden">
-                      <img
-                        src={
-                          item.product?.imageCover ||
-                          item.product?.images?.[0]
-                        }
+                      <SafeImage
+                        src={getProductImageUrl(item.product)}
                         alt={item.product?.title_ar || "منتج"}
                         className="w-full h-full object-cover mix-blend-multiply"
                       />
@@ -194,7 +197,10 @@ export default function Cart() {
                 </div>
               </div>
 
-              <Link to="/checkout" className="block mt-8">
+              <Link
+                to={user ? "/checkout" : "/login?redirect=/checkout"}
+                className="block mt-8"
+              >
                 <Button className="w-full bg-primary hover:bg-primary/90 text-white rounded-xl h-14 text-lg font-bold shadow-lg flex items-center justify-center gap-3">
                   متابعة للدفع
                   <CreditCard size={20} />

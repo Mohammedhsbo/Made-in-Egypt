@@ -16,6 +16,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import SafeImage from "@/components/ui/safe-image";
+import { getProductImageUrl } from "@/utils/formatImageUrl";
+
 
 // ─── Status config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -189,17 +192,11 @@ function OrderDetailModal({ orderId, onClose }) {
                       key={idx}
                       className="flex items-center gap-3 bg-gray-50 p-3 rounded-2xl border border-gray-100"
                     >
-                      {(item.product?.imageCover ||
-                        item.product?.images?.[0]) && (
-                        <img
-                          src={
-                            item.product?.imageCover ||
-                            item.product?.images?.[0]
-                          }
-                          alt={item.product?.title_ar}
-                          className="w-14 h-14 object-cover rounded-xl border border-gray-100 flex-shrink-0"
-                        />
-                      )}
+                      <SafeImage
+                        src={getProductImageUrl(item.product)}
+                        alt={item.product?.title_ar}
+                        className="w-14 h-14 object-cover rounded-xl border border-gray-100 flex-shrink-0"
+                      />
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-sm text-slate-800 truncate">
                           {item.product?.title_ar || item.product?.title_en}
@@ -379,17 +376,11 @@ export default function MyOrders() {
                       {/* Order info */}
                       <div className="flex items-center gap-4">
                         {/* Product thumbnail */}
-                        {(previewItem?.product?.imageCover ||
-                          previewItem?.product?.images?.[0]) && (
-                          <img
-                            src={
-                              previewItem?.product?.imageCover ||
-                              previewItem?.product?.images?.[0]
-                            }
-                            alt=""
-                            className="w-14 h-14 object-cover rounded-xl border border-gray-100 flex-shrink-0"
-                          />
-                        )}
+                        <SafeImage
+                          src={getProductImageUrl(previewItem?.product)}
+                          alt=""
+                          className="w-14 h-14 object-cover rounded-xl border border-gray-100 flex-shrink-0"
+                        />
                         <div>
                           <p className="font-mono text-xs text-gray-400 mb-0.5">
                             #{order._id?.slice(-10).toUpperCase()}

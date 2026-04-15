@@ -6,6 +6,7 @@ import { useSearch } from "../context/searchContext";
 import { useAuth } from "../context/auth.context";
 import { useCart } from "../context/cartContext";
 import { Button } from "@/components/ui/button";
+import { MAIN_NAV_ITEMS } from "@/constants/navigation";
 
 
 export default function Header() {
@@ -18,31 +19,23 @@ export default function Header() {
   0
 ) || 0;
 
-  const navitems = [
-    { name: "الرئيسية", link: "/" },
-    { name: "العطور", link: "/perfumes" },
-    { name: "الملابس", link: "/clothes" },
-    { name: "الجوارب", link: "/socks" },
-    { name: "احذيه", link: "/shoes" },
-  ];
-
   return (
     <header className="fixed top-0 left-0 w-full bg-white/95 backdrop-blur-md shadow-sm z-500 border-b border-gray-100 ">
       <div className="max-w-7xl mx-auto px-4 h-[70px] lg:h-[90px] flex items-center justify-between gap-4 lg:gap-8">
         
         {/* Mobile Nav Toggle */}
         <div className="lg:hidden flex items-center">
-           <MobileNav navitems={navitems} />
+           <MobileNav navitems={MAIN_NAV_ITEMS} />
         </div>
 
         {/* Logo */}
         <Link to="/" className="shrink-0 flex items-center justify-center lg:justify-start flex-1 lg:flex-none">
-          <img src={Logo} alt="logo" className="h-[46px] lg:h-[60px] object-contain" />
+          <img src={Logo} alt="logo" className="h-[56px] lg:h-[78px] object-contain py-2" />
         </Link>
 
         {/* Desktop Navigation Links */}
         <nav className="hidden lg:flex items-center gap-6 flex-1 justify-center">
-          {navitems.map((item, index) => (
+          {MAIN_NAV_ITEMS.map((item, index) => (
             <Link
               key={index}
               to={item.link}
@@ -75,7 +68,6 @@ export default function Header() {
 
         {/* Actions (Cart & Auth) */}
         <div className="flex items-center gap-3 lg:gap-5 shrink-0 justify-end flex-1 lg:flex-none">
-          
           <div className="hidden sm:flex items-center gap-2 border-l border-gray-200 pl-3 lg:pl-5 ml-1 lg:ml-2">
             {!user ? (
               <>

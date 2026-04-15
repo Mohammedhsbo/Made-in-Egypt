@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import api from "../../api/axios.base";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ export default function EditCoupon() {
     usageLimit: "",
   });
 
-  const getCoupon = async () => {
+  const getCoupon = useCallback(async () => {
     try {
       const res = await api.get(`/coupons/${id}`);
       const c = res.data.data.coupon;
@@ -37,11 +37,11 @@ export default function EditCoupon() {
     } catch {
       toast.error("فشل تحميل الكوبون");
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     getCoupon();
-  }, []);
+  }, [getCoupon]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

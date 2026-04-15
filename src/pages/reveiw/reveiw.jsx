@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import React, { useCallback, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import api from "../../api/axios.base";
 import { toast } from "sonner";
-import { useAuth } from "../../context/auth.context";
-import { DeleteIcon, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 export default function Reviews() {
   const { id } = useParams();
@@ -11,16 +10,14 @@ export default function Reviews() {
   const [reviews, setReviews] = useState([]);
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(1);
-  const {user} = useAuth();
-  // ✅ get reviews
-  async function getReviews() {
+  const getReviews = useCallback(async () => {
     try {
-     const res = await api.get(`/reviews/product/${id}`);
+      const res = await api.get(`/reviews/product/${id}`);
       setReviews(res.data.data?.reviews || []);
     } catch (err) {
       console.log(err);
     }
-  }
+  }, [id]);
 
   // ✅ add review
   async function addReview(e) {
@@ -47,25 +44,29 @@ export default function Reviews() {
       setComment("");
       setRating(1);
 
-      getReviews(); 
+      getReviews();
     } catch (err) {
-       console.log(err);
-        toast.error(err.response.data.message);
+      console.log(err);
+      toast.error(err?.response?.data?.message || "فشل اضافة التقييم");
     }
   }
-async function deleteReview(id) {
-  try {
-    await api.delete(`/reviews/${id}`);
-    toast.success("تم حذف التقييم");
-    getReviews();
-  } catch (err) {
-    console.log(err);
-    toast.error(err.response.data.message);
+  async function deleteReview(reviewId) {
+    try {
+      await api.delete(`/reviews/${reviewId}`);
+      toast.success("تم حذف التقييم");
+      getReviews();
+    } catch (err) {
+      console.log(err);
+      toast.error(err?.response?.data?.message || "فشل حذف التقييم");
+    }
   }
-}
+
   useEffect(() => {
-    getReviews();
-  }, [id]);
+    const loadReviews = async () => {
+      await getReviews();
+    };
+    loadReviews();
+  }, [getReviews]);
 
   return (
  <div dir="rtl"  className=" w-full p-4 text-right">

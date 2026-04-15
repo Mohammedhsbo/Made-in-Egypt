@@ -5,6 +5,8 @@ import { useSearch } from "@/context/searchContext";
 import { Edit, Trash2, Package, Search, Plus } from "lucide-react";
 import api from "../../api/axios.base";
 import { useNavigate } from "react-router-dom";
+import SafeImage from "@/components/ui/safe-image";
+
 
 
 export default function ProductsPage() {
@@ -103,16 +105,8 @@ export default function ProductsPage() {
             >
 
               {/* Image */}
-              <img
-                src={(() => {
-                  const url = product.imageCover;
-                  if (!url) return "";
-                  if (url.includes("drive.google.com")) {
-                    const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                    if (match) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
-                  }
-                  return url;
-                })()}
+              <SafeImage
+                src={product}
                 className="w-16 h-16 object-cover rounded"
               />
 

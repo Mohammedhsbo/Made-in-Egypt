@@ -20,6 +20,8 @@ import Orders from "./pages/admin/order";
 import AdminLayout from "./pages/admin/layout";
 import Register from "./pages/user system/register";
 import Login from "./pages/user system/login";
+import ForgotPassword from "./pages/user system/forgot-password";
+import VerifyOtp from "./pages/user system/verify-otp";
 import Profile from "./pages/user system/profile";
 import MyOrders from "./pages/user system/userorders";
 import { AuthProvider } from "./context/auth.context";
@@ -50,6 +52,8 @@ export default function App() {
         { path: "socks", element: <Socks /> },
         { path: "register", element: <Register /> },
         { path: "login", element: <Login /> },
+        { path: "forgot-password", element: <ForgotPassword /> },
+        { path: "verify-otp", element: <VerifyOtp /> },
         { path: "profile", element: <Profile /> },
         { path: "my-orders", element: <MyOrders /> },
         {

@@ -3,6 +3,9 @@ import api from "../../api/axios.base";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+import SafeImage from "@/components/ui/safe-image";
+import { formatImageUrl } from "@/utils/formatImageUrl";
+
 export default function CreateProduct() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -40,7 +43,7 @@ export default function CreateProduct() {
           priceAfterDiscount: p.priceAfterDiscount || "",
           quantity: p.quantity || "",
           category: p.category?._id || "",
-          imageCover: p.imageCover || "",
+          imageCover:p.imageCover || "",
         });
       } catch (err) {
         console.log(err);
@@ -49,13 +52,17 @@ export default function CreateProduct() {
     };
 
     fetchProduct();
-  }, [id]);
+  }, [id, isEdit]);
 
   // ================= HANDLE CHANGE =================
   const handleChange = (e) => {
+    const value =
+      e.target.name === "imageCover"
+        ? formatImageUrl(e.target.value)
+        : e.target.value;
     setForm((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [e.target.name]: value,
     }));
   };
 
@@ -75,7 +82,7 @@ export default function CreateProduct() {
         priceAfterDiscount: Number(form.priceAfterDiscount),
         quantity: Number(form.quantity),
         category: form.category,
-        imageCover: form.imageCover,
+        imageCover: formatImageUrl(form.imageCover),
       };
 
       if (isEdit) {
@@ -124,7 +131,7 @@ export default function CreateProduct() {
 
         {/* Preview */}
         {form.imageCover && (
-          <img
+          <SafeImage
             src={form.imageCover}
             alt="preview"
             className="w-32 h-32 object-cover rounded border"

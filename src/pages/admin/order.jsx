@@ -11,6 +11,8 @@ import {
   AlertTriangle,
   ChevronDown,
 } from "lucide-react";
+import SafeImage from "@/components/ui/safe-image";
+
 
 const STATUS_CONFIG = {
   pending: {
@@ -168,15 +170,10 @@ function OrderDetailModal({ orderId, onClose }) {
                       key={idx}
                       className="flex items-center gap-4 bg-gray-50 p-3 rounded-2xl border border-gray-100"
                     >
-                      <img
-                        src={
-                          item.product?.imageCover || item.product?.images?.[0]
-                        }
+                      <SafeImage
+                        src={item.product}
                         alt={item.product?.title_ar}
                         className="w-14 h-14 object-cover rounded-xl border border-gray-100"
-                        onError={(e) =>
-                          (e.target.style.display = "none")
-                        }
                       />
                       <div className="flex-1">
                         <p className="font-bold text-sm text-slate-800 line-clamp-1">

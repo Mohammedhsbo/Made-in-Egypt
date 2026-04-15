@@ -1,7 +1,7 @@
 import { useCart } from "../context/cartContext";
 import { useAuth } from "../context/auth.context";
 import { Button } from "@/components/ui/button";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { toast } from "sonner";
@@ -17,7 +17,9 @@ import {
   Navigation,
 } from "lucide-react";
 import api from "../api/axios.base";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import SafeImage from "@/components/ui/safe-image";
+import { getProductImageUrl } from "@/utils/formatImageUrl";
 
 const checkoutSchema = yup.object().shape({
   fullName: yup.string().required("الاسم بالكامل مطلوب"),
@@ -61,25 +63,32 @@ const checkoutSchema = yup.object().shape({
 
 export default function Checkout() {
   const { cart, clearCart } = useCart();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [couponCode, setCouponCode] = useState("");
-const [discount, setDiscount] = useState(0);
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
 
-
-  // Cart from backend is an object { items: [...], ... }
   const items = cart?.items || [];
-const SHIPPING_FEE = items.length > 0 ? 75 : 0;
-   const total = Array.isArray(items)
+  const SHIPPING_FEE = items.length > 0 ? 75 : 0;
+  const subtotal = Array.isArray(items)
     ? items.reduce((sum, item) => {
         const price =
           item.price ||
+          item.product?.priceAfterDiscount ||
+          item.product?.basePrice ||
           0;
 
         return sum + price * (item.quantity || 1);
       }, 0)
     : 0;
-const [finalTotal, setFinalTotal] = useState(total);
+  const finalTotal = Math.max(0, subtotal - couponDiscount + SHIPPING_FEE);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/login?redirect=/checkout", { replace: true });
+    }
+  }, [authLoading, navigate, user]);
   const {
     register,
     handleSubmit,
@@ -90,23 +99,39 @@ const [finalTotal, setFinalTotal] = useState(total);
     resolver: yupResolver(checkoutSchema),
     defaultValues: { paymentMethod: "cash" },
   });
-  //apply discount
-const handleApplyCoupon = async () => {
-  try {
-    const res = await api.patch("/cart/apply-coupon", {
-      code: couponCode,
-    });
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast.error("اكتب كود الخصم أولاً");
+      return;
+    }
 
-    const cart = res.data.data.cart;
+    if (!user) {
+      toast.error("تطبيق الكوبون متاح بعد تسجيل الدخول");
+      return;
+    }
 
-    toast.success("تم تطبيق الكوبون بنجاح ");
+    setIsApplyingCoupon(true);
+    try {
+      const res = await api.patch("/cart/apply-coupon", {
+        code: couponCode.trim(),
+      });
+      const backendCart = res?.data?.data?.cart;
+      const discountedSubtotal =
+        backendCart?.totalPriceAfterDiscount ?? backendCart?.totalPrice;
+      const nextDiscount =
+        typeof discountedSubtotal === "number"
+          ? Math.max(0, subtotal - discountedSubtotal)
+          : 0;
 
-    setFinalTotal(cart.totalPriceAfterDiscount+SHIPPING_FEE);
-
-  } catch (error) {
-    toast.error(error.response?.data?.message || "كوبون غير صالح");
-  }
-};
+      setCouponDiscount(nextDiscount);
+      toast.success("تم تطبيق الكوبون بنجاح");
+    } catch (error) {
+      setCouponDiscount(0);
+      toast.error(error.response?.data?.message || "كوبون غير صالح");
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
 
   const paymentMethod = watch("paymentMethod");
 
@@ -137,16 +162,14 @@ ${itemsText}
   };
 
   const onSubmit = async (data) => {
-    // Guard: user must be logged in
-    if (!user) {
-      toast.error("يجب تسجيل الدخول أولاً لإتمام الطلب");
-      navigate("/login");
+    if (items.length === 0) {
+      toast.error("سلة المشتريات فارغة");
       return;
     }
 
-    if (items.length === 0) return;
-
     try {
+      if (!user) return;
+
       const payload = {
         shippingAddress: {
           fullName: data.fullName,
@@ -208,15 +231,18 @@ ${itemsText}
     );
   }
 
-  const InputWrapper = ({ icon: Icon, error, children }) => (
-    <div className="relative group">
-      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors z-10">
-        <Icon size={20} />
+  const InputWrapper = ({ icon, error, children }) => {
+    const IconComponent = icon;
+    return (
+      <div className="relative group">
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors z-10">
+          <IconComponent size={20} />
+        </div>
+        {children}
+        {error && <p className="text-red-500 text-sm mt-1 px-2">{error}</p>}
       </div>
-      {children}
-      {error && <p className="text-red-500 text-sm mt-1 px-2">{error}</p>}
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 w-full">
@@ -424,10 +450,8 @@ ${itemsText}
                   className="flex items-center gap-4 bg-white p-3 rounded-2xl border border-gray-100 shadow-sm relative"
                 >
                   <div className="relative">
-                    <img
-                      src={
-                        item.product?.imageCover || item.product?.images?.[0]
-                      }
+                    <SafeImage
+                      src={getProductImageUrl(item.product)}
                       alt={item.product?.title_ar || item.product?.title_en}
                       className="w-16 h-16 object-cover rounded-xl border border-gray-50"
                     />
@@ -457,13 +481,19 @@ ${itemsText}
                 <span>المجموع</span>
                 <span>
                   {
-                  total.toFixed(2)
+                  subtotal.toFixed(2)
                   } EGP</span>
               </div>
               <div className="flex justify-between text-gray-500 font-medium">
                 <span>التوصيل</span>
-                <span className="text-green-600 font-bold">75</span>
+                <span className="text-green-600 font-bold">{SHIPPING_FEE}</span>
               </div>
+              {couponDiscount > 0 && (
+                <div className="flex justify-between text-green-600 font-medium">
+                  <span>خصم الكوبون</span>
+                  <span>-{couponDiscount.toFixed(2)} EGP</span>
+                </div>
+              )}
               <div className="mb-4 flex gap-2">
   <input
     type="text"
@@ -476,9 +506,10 @@ ${itemsText}
   <button
     type="button"
     onClick={handleApplyCoupon}
+    disabled={isApplyingCoupon}
     className="bg-black text-white px-4 rounded-xl"
   >
-    تطبيق
+    {isApplyingCoupon ? "جاري..." : "تطبيق"}
   </button>
 </div>
               <div className="flex justify-between items-center pt-4 border-t border-gray-200">
@@ -486,7 +517,7 @@ ${itemsText}
                   الإجمالي النهائي
                 </span>
                 <span className="text-3xl font-black text-primary">
-                  {(finalTotal+SHIPPING_FEE).toFixed(2)}{" "}
+                  {finalTotal.toFixed(2)}{" "}
                   <span className="text-sm">EGP</span>
                 </span>
               </div>

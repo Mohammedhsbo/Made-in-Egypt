@@ -13,6 +13,8 @@ import Reviews from "./reveiw/reveiw";
 import { useAuth } from "../context/auth.context";
 import { toast } from "sonner";
 
+import SafeImage from "@/components/ui/safe-image";
+
 export default function Productdetails() {
   const { id } = useParams();
   const { data, isLoading, error } = useProductDetails(id);
@@ -46,21 +48,11 @@ export default function Productdetails() {
   const category =
     product?.category?.name_en || product?.category?.name_ar || "";
 
-  const getImageUrl = (url) => {
-    if (!url) return "";
-    if (url.includes("drive.google.com")) {
-      const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-      if (match)
-        return `https://drive.google.com/uc?export=view&id=${match[1]}`;
-    }
-    return url;
-  };
-
   const images =
     product?.images?.length > 0
-      ? product.images.map(getImageUrl)
+      ?  product.images
       : product?.imageCover
-        ? [getImageUrl(product.imageCover)]
+        ? [product.imageCover]
         : [];
 
   // ===================== SLIDER SETTINGS =====================
@@ -112,7 +104,7 @@ export default function Productdetails() {
                 <Slider {...sliderSettings}>
                   {images.map((img, i) => (
                     <div key={i}>
-                      <img
+                      <SafeImage
                         src={img}
                         alt="product"
                         className="w-full h-[400px] object-contain"

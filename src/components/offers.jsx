@@ -1,6 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import SafeImage from "@/components/ui/safe-image";
+
 
 export default function TodaysDealCard({ deals }) {
   if (!deals || deals.length === 0) return null;
@@ -10,15 +12,6 @@ export default function TodaysDealCard({ deals }) {
   const title = product?.title_ar || product?.title_en || "";
   const description = product?.description_ar || product?.description_en || "";
   const price = product?.priceAfterDiscount || product?.basePrice || 0;
-
-  const getImageUrl = (url) => {
-    if (!url) return "";
-    if (url.includes("drive.google.com")) {
-      const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-      if (match) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
-    }
-    return url;
-  };
 
   return (
     <div className="relative bg-slate-900 rounded-[2rem] p-8 md:p-12 mb-16 overflow-hidden shadow-2xl">
@@ -69,11 +62,7 @@ export default function TodaysDealCard({ deals }) {
         <div className="flex justify-center md:justify-end relative group">
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-3xl z-10 pointer-events-none hidden md:block"></div>
           <div className="relative w-[280px] h-[280px] md:w-[380px] md:h-[380px] bg-white rounded-3xl shadow-xl overflow-hidden group-hover:-translate-y-2 transition-transform duration-500 border border-white/10">
-            <img
-              src={getImageUrl(product.imageCover) || getImageUrl(product.images?.[0])}
-              alt={title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-            />
+            
           </div>
         </div>
       </div>
