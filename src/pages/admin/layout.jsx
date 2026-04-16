@@ -7,10 +7,7 @@ export default function AdminLayout() {
   
   return (
     <div className="flex min-h-screen bg-slate-50 font-sans" dir="rtl">
-      {/* Sidebar Overlay for Mobile could be added here, currently sticking to existing logic */}
-      <div className="w-64 bg-white border-l border-gray-200 shadow-sm hidden md:block">
-        <Sidebar />
-      </div>
+      <Sidebar />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">

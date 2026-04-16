@@ -20,11 +20,11 @@ export default function Header() {
 ) || 0;
 
   return (
-    <header className="fixed top-0 left-0 w-full bg-white/95 backdrop-blur-md shadow-sm z-500 border-b border-gray-100 ">
-      <div className="max-w-7xl mx-auto px-4 h-[70px] lg:h-[90px] flex items-center justify-between gap-4 lg:gap-8">
+    <header className="z-50 fixed top-0 left-0 w-full bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100  ">
+      <div className="  max-w-7xl mx-auto px-4 h-[70px] lg:h-[90px] flex items-center justify-between gap-4 lg:gap-8">
         
         {/* Mobile Nav Toggle */}
-        <div className="lg:hidden flex items-center">
+        <div className="lg:hidden flex items-center z-50 flex-1">
            <MobileNav navitems={MAIN_NAV_ITEMS} />
         </div>
 

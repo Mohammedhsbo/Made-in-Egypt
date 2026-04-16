@@ -11,19 +11,20 @@ export default function Sidebar() {
   }, [open]);
 
   return (
-    <div className="flex ">
+    <>
       {/* زر الموبايل */}
       <button
         onClick={() => setOpen(true)}
-        className="md:hidden fixed top-4 right-4 z-500 bg-gray-800 text-white p-3 rounded-lg shadow-lg"
+        className="md:hidden fixed top-4 right-4 z-[100] bg-gray-800 text-white p-3 rounded-lg shadow-lg"
+     
       >
-        <HiMenu size={22} />
+        <HiMenu size={26}  />
       </button>
 
       {/* Overlay */}
       {open && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity"
+          className="fixed inset-0 bg-black/50 z-[90] md:hidden transition-opacity"
           onClick={() => setOpen(false)}
         />
       )}
@@ -33,7 +34,7 @@ export default function Sidebar() {
         className={`
           fixed md:static top-0 right-0 h-full w-64
           bg-gray-800 text-white flex flex-col p-6
-          z-50
+          z-[100]
           transform transition-transform duration-300 ease-in-out
           ${open ? "translate-x-0" : "translate-x-full"}
           md:translate-x-0
@@ -67,6 +68,6 @@ export default function Sidebar() {
           ))}
         </nav>
       </aside>
-    </div>
+    </>
   );
 }
