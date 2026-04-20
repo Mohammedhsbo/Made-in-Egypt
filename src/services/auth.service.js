@@ -20,3 +20,7 @@ export async function forgotPasswordRequest(payload) {
 export async function verifyOtpRequest(payload) {
   return api.post("/auth/verify-otp", payload);
 }
+
+export async function resetPasswordRequest(payload) {
+  return api.post("/auth/reset-password", payload);
+}

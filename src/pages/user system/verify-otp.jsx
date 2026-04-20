@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { verifyOtpSchema } from "../../../utils/schmea.validation";
-import { verifyOtpRequest } from "@/services/auth.service";
+import { resetPasswordRequest } from "@/services/auth.service";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { KeyRound, Lock, Mail } from "lucide-react";
@@ -32,9 +32,8 @@ export default function ResetPassword() {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      await verifyOtpRequest({
-        email: data.email,
-        otp: data.otp,
+      await resetPasswordRequest({
+        token: data.otp,
         newPassword: data.password,
       });
 
