@@ -22,6 +22,7 @@ import Register from "./pages/user system/register";
 import Login from "./pages/user system/login";
 import ForgotPassword from "./pages/user system/forgot-password";
 import VerifyOtp from "./pages/user system/verify-otp";
+import VerifyEmail from "./pages/user system/verify-email";
 import Profile from "./pages/user system/profile";
 import MyOrders from "./pages/user system/userorders";
 import { AuthProvider } from "./context/auth.context";
@@ -54,6 +55,7 @@ export default function App() {
         { path: "login", element: <Login /> },
         { path: "forgot-password", element: <ForgotPassword /> },
         { path: "verify-otp", element: <VerifyOtp /> },
+        { path: "verify-email", element: <VerifyEmail /> },
         { path: "profile", element: <Profile /> },
         { path: "my-orders", element: <MyOrders /> },
         {

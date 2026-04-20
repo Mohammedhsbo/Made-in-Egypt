@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import SafeImage from "@/components/ui/safe-image";
 import { formatImageUrl } from "@/utils/formatImageUrl";
+import { getAllCategoriesRequest } from "@/services/category.service";
 
 export default function CreateProduct() {
   const { id } = useParams();
@@ -12,6 +13,7 @@ export default function CreateProduct() {
   const isEdit = Boolean(id);
 
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
 
   const [form, setForm] = useState({
     title_ar: "",
@@ -25,7 +27,18 @@ export default function CreateProduct() {
     imageCover: "",
   });
 
- 
+  // Fetch Categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await getAllCategoriesRequest();
+        setCategories(res.data.data.categories || []);
+      } catch (err) {
+        console.log("Failed to fetch categories:", err);
+      }
+    };
+    fetchCategories();
+  }, []);
   useEffect(() => {
     if (!isEdit) return;
 
@@ -125,7 +138,19 @@ export default function CreateProduct() {
 
         <input name="quantity" value={form.quantity} onChange={handleChange} type="number" placeholder="الكمية" className="border p-2 rounded" />
 
-        <input name="category" value={form.category} onChange={handleChange} placeholder="Category ID (ObjectId)" className="border p-2 rounded" />
+        <select
+          name="category"
+          value={form.category}
+          onChange={handleChange}
+          className="border p-2 rounded bg-white text-gray-700"
+        >
+          <option value="">اختر القسم (Category)</option>
+          {categories.map((cat) => (
+            <option key={cat._id} value={cat._id}>
+              {cat.name_ar} | {cat.name_en}
+            </option>
+          ))}
+        </select>
 
         <input name="imageCover" value={form.imageCover} onChange={handleChange} placeholder="Image URL" className="border p-2 rounded" />
 

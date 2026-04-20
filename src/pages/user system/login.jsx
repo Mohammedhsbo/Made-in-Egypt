@@ -49,6 +49,12 @@ export default function Login() {
       if (err.response?.status === 401) {
         setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
         toast.error("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+      } else if (err.response?.status === 403) {
+        setError("يرجى تفعيل بريدك الإلكتروني أولاً");
+        toast.info("يرجى تفعيل بريدك الإلكتروني أولاً، جاري توجيهك...");
+        setTimeout(() => {
+          navigate(`/verify-email?email=${encodeURIComponent(data.email)}`);
+        }, 2000);
       } else {
         setError("حدث خطأ أثناء تسجيل الدخول");
         toast.error("حدث خطأ أثناء تسجيل الدخول، حاول مرة أخرى.");

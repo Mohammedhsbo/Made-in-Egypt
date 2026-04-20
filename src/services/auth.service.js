@@ -24,3 +24,11 @@ export async function verifyOtpRequest(payload) {
 export async function resetPasswordRequest(payload) {
   return api.post("/auth/reset-password", payload);
 }
+
+export async function verifyEmailRequest(payload) {
+  return api.post("/auth/verify-email", payload);
+}
+
+export async function resendVerifyEmailRequest(payload) {
+  return api.post("/auth/resend-verification-email", payload);
+}

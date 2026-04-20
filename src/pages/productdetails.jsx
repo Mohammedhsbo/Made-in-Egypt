@@ -50,7 +50,7 @@ export default function Productdetails() {
 
   const images =
     product?.images?.length > 0
-      ?  product.images
+      ? product.images
       : product?.imageCover
         ? [product.imageCover]
         : [];
@@ -97,9 +97,15 @@ export default function Productdetails() {
             {/* IMAGE */}
             <div className="w-full lg:w-5/12">
               <div className="bg-gray-50 rounded-3xl p-6 border relative">
-                <span className="absolute top-4 right-4 bg-white px-3 py-1 text-xs rounded-full shadow">
+                <span className="absolute top-4 right-4 bg-white px-3 py-1 text-xs rounded-full shadow z-20">
                   {category}
                 </span>
+
+                {product?.priceAfterDiscount > 0 && product?.priceAfterDiscount < product?.basePrice && (
+                  <div className="absolute top-4 left-4 bg-red-600 text-white text-[10px] uppercase font-black px-3 py-1 rounded-full shadow-lg z-20">
+                    خصم
+                  </div>
+                )}
 
                 <Slider {...sliderSettings}>
                   {images.map((img, i) => (
@@ -120,11 +126,22 @@ export default function Productdetails() {
               <h1 className="text-3xl font-black">{title}</h1>
 
               <div className="flex items-center gap-4">
-                <h2 className="text-4xl font-black text-primary">
-                  {price} EGP
-                </h2>
+                {product?.priceAfterDiscount > 0 && product?.priceAfterDiscount < product?.basePrice ? (
+                  <div className="flex flex-col">
+                    <h2 className="text-4xl font-black text-red-600">
+                      {product.priceAfterDiscount} EGP
+                    </h2>
+                    <p className="text-lg text-gray-400 line-through">
+                      {product.basePrice} EGP
+                    </p>
+                  </div>
+                ) : (
+                  <h2 className="text-4xl font-black text-primary">
+                    {product?.basePrice || 0} EGP
+                  </h2>
+                )}
 
-                <span className="bg-green-100 text-green-700 px-3 py-1 rounded-xl text-sm">
+                <span className="bg-green-100 text-green-700 px-3 py-1 rounded-xl text-sm self-start mt-2">
                   متوفر
                 </span>
               </div>

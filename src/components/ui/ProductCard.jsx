@@ -32,6 +32,12 @@ export default function ProductCard({ product }) {
           alt={title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
+        {/* Sale Badge */}
+        {product?.priceAfterDiscount > 0 && product?.priceAfterDiscount < product?.basePrice && (
+          <div className="absolute top-3 left-3 bg-red-600 text-white text-[10px] uppercase font-black px-2 py-1 rounded-full shadow-lg z-10">
+            خصم
+          </div>
+        )}
       </Link>
 
       {/* Content */}
@@ -50,12 +56,26 @@ export default function ProductCard({ product }) {
         {/* Bottom */}
         <div className="mt-auto flex items-center justify-between">
 
-          <p className="text-xl font-bold text-gray-900">
-            {product?.basePrice || 0}{" "}
-            <span className="text-sm font-normal text-gray-500">
-              EGP
-            </span>
-          </p>
+          <div className="flex flex-col">
+            {product?.priceAfterDiscount > 0 && product?.priceAfterDiscount < product?.basePrice ? (
+              <>
+                <p className="text-xl font-bold text-red-600">
+                  {product.priceAfterDiscount}{" "}
+                  <span className="text-sm font-normal">EGP</span>
+                </p>
+                <p className="text-sm text-gray-400 line-through">
+                  {product.basePrice} EGP
+                </p>
+              </>
+            ) : (
+              <p className="text-xl font-bold text-gray-900">
+                {product?.basePrice || 0}{" "}
+                <span className="text-sm font-normal text-gray-500">
+                  EGP
+                </span>
+              </p>
+            )}
+          </div>
 
           <Link to={`/productdetails/${product?._id}`}>
             <Button

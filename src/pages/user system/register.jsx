@@ -7,8 +7,10 @@ import { registerSchema } from "../../../utils/schmea.validation";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { User, Mail, Lock, UserPlus, Store } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function Register() {
+  const navigate = useNavigate();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
 
@@ -32,9 +34,9 @@ export default function Register() {
         password: data.password,
       });
 
-      toast.success(res.data.message || "تم إنشاء الحساب بنجاح! يرجى تسجيل الدخول.");
+      toast.success(res.data.message || "تم إنشاء الحساب بنجاح! يرجى تأكيد بريدك الإلكتروني.");
       reset();
-      window.location.href = "/login";
+      navigate(`/verify-email?email=${encodeURIComponent(data.email)}`);
     } catch (err) {
       if (err.response?.status === 500) {
         toast.error("البريد الإلكتروني مستخدم بالفعل، يرجى استخدام بريد آخر.");

@@ -11,6 +11,14 @@
       .oneOf([yup.ref("password")], "Passwords must match")
       .required("Confirm Password is required"),
   });
+
+  export const verifyEmailSchema = yup.object().shape({
+    email: yup.string().email("Invalid email").required("Email is required"),
+    otp: yup
+      .string()
+      .required("Verification code is required")
+      .length(6, "Verification code must be 6 digits"),
+  });
   export const loginSchema = yup.object().shape({
     email: yup.string().email("Invalid email").required("Email is required"),
     password: yup.string().required("Password is required"),
