@@ -106,7 +106,7 @@ export default function ProductsPage() {
 
               {/* Image */}
               <SafeImage
-                src={product}
+                src={product.imageCover}
                 className="w-16 h-16 object-cover rounded"
               />
 

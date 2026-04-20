@@ -36,17 +36,27 @@ export default function TodaysDealCard({ deals }) {
 
           <div className="flex items-center gap-6 mt-4">
             <div className="flex flex-col">
-              <span className="text-slate-400 text-sm font-medium mb-1 line-through">
-                {(price * 1.3).toFixed(2)} EGP
-              </span>
-              <span className="text-4xl font-black text-white">
-                {price} <span className="text-xl font-medium text-slate-300">EGP</span>
-              </span>
+              {product?.priceAfterDiscount > 0 && product?.priceAfterDiscount < product?.basePrice ? (
+                <>
+                  <span className="text-slate-400 text-sm font-medium mb-1 line-through">
+                    {product.basePrice} EGP
+                  </span>
+                  <span className="text-4xl font-black text-white">
+                    {product.priceAfterDiscount} <span className="text-xl font-medium text-slate-300">EGP</span>
+                  </span>
+                </>
+              ) : (
+                <span className="text-4xl font-black text-white">
+                  {product?.basePrice} <span className="text-xl font-medium text-slate-300">EGP</span>
+                </span>
+              )}
             </div>
             
-            <div className="bg-red-500/20 text-red-400 font-bold px-3 py-1 rounded-lg border border-red-500/30">
-               وفر 30%
-            </div>
+            {product?.priceAfterDiscount > 0 && product?.priceAfterDiscount < product?.basePrice && (
+              <div className="bg-red-500/20 text-red-400 font-bold px-3 py-1 rounded-lg border border-red-500/30">
+                وفر {Math.round((1 - product.priceAfterDiscount / product.basePrice) * 100)}%
+              </div>
+            )}
           </div>
 
           <div className="pt-4">
@@ -62,7 +72,11 @@ export default function TodaysDealCard({ deals }) {
         <div className="flex justify-center md:justify-end relative group">
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-3xl z-10 pointer-events-none hidden md:block"></div>
           <div className="relative w-[280px] h-[280px] md:w-[380px] md:h-[380px] bg-white rounded-3xl shadow-xl overflow-hidden group-hover:-translate-y-2 transition-transform duration-500 border border-white/10">
-            
+            <SafeImage
+              src={product.imageCover}
+              alt={title}
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
       </div>
