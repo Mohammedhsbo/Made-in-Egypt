@@ -136,30 +136,30 @@ export default function Checkout() {
   const paymentMethod = watch("paymentMethod");
 
   // Optional: WhatsApp notification (non-blocking)
-  const sendWhatsApp = (data) => {
-    const itemsText = items
-      .map(
-        (item) =>
-          `${item.product?.title_ar || item.product?.title_en || "منتج"} (x${item.quantity || 1})`
-      )
-      .join(" | ");
+//   const sendWhatsApp = (data) => {
+//     const itemsText = items
+//       .map(
+//         (item) =>
+//           `${item.product?.title_ar || item.product?.title_en || "منتج"} (x${item.quantity || 1})`
+//       )
+//       .join(" | ");
 
-    const message = `
-*طلب جديد* 🛍️
+//     const message = `
+// *طلب جديد* 🛍️
 
-*الإجمالي:* ${finalTotal} EGP
+// *الإجمالي:* ${finalTotal} EGP
 
-*تفاصيل العميل:*
-الاسم: ${data.fullName}
-الهاتف: ${data.phone}
-العنوان: ${data.address} - ${data.city}
+// *تفاصيل العميل:*
+// الاسم: ${data.fullName}
+// الهاتف: ${data.phone}
+// العنوان: ${data.address} - ${data.city}
 
-*المنتجات:*
-${itemsText}
-`;
-    const encoded = encodeURIComponent(message);
-    window.open(`https://wa.me/201014625009?text=${encoded}`, "_blank");
-  };
+// *المنتجات:*
+// ${itemsText}
+// `;
+//     const encoded = encodeURIComponent(message);
+//     window.open(`https://wa.me/201014625009?text=${encoded}`, "_blank");
+//   };
 
   const onSubmit = async (data) => {
     if (items.length === 0) {
@@ -200,7 +200,7 @@ ${itemsText}
       reset();
 
       // Optional WhatsApp notification (non-blocking)
-      sendWhatsApp(data);
+      // sendWhatsApp(data);
 
       navigate("/my-orders");
     } catch (error) {

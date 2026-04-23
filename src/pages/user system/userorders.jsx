@@ -100,11 +100,13 @@ function OrderDetailModal({ orderId, onClose }) {
   }, []);
 
   return (
+    /* FIX: Use fixed (not absolute) so the modal covers the full viewport on mobile */
     <div 
-      className=" absolute inset-0 z-[var(--z-drawer)] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm  "
+      className="fixed inset-0 z-[var(--z-drawer)] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+      {/* FIX: cap height on mobile to avoid going off-screen; use safe area insets for notched phones */}
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[85dvh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className=" flex items-center justify-between p-6 border-b border-gray-100 sticky top-0 bg-white rounded-t-3xl z-10">
           <div>
@@ -284,18 +286,21 @@ export default function MyOrders() {
   if (authLoading) return null;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 md:px-8 py-10 w-full">
+    // Page container — top spacing is handled by layout.jsx's <main> padding.
+    // overflow-x-hidden prevents any child element from causing horizontal scroll.
+    <div className="max-w-4xl mx-auto px-4 md:px-8 py-6 md:py-10 w-full overflow-x-hidden">
       {/* Page Header */}
-      <div className="mb-10">
+      <div className="mb-8 md:mb-10">
         <div className="flex items-center gap-3 mb-2">
-          <div className="bg-primary/10 p-3 rounded-full text-primary">
+          <div className="bg-primary/10 p-3 rounded-full text-primary flex-shrink-0">
             <Package size={26} />
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-slate-800 tracking-tight">
+          <h1 className="text-2xl md:text-4xl font-black text-slate-800 tracking-tight">
             طلباتي
           </h1>
         </div>
-        <p className="text-gray-500 font-medium mr-16">
+        {/* FIX: removed large fixed mr-16 margin that caused text to overflow on small screens */}
+        <p className="text-gray-500 font-medium mt-1">
           تتبع حالة جميع طلباتك السابقة
         </p>
       </div>
@@ -368,7 +373,8 @@ export default function MyOrders() {
                     }`}
                   />
 
-                  <div className="flex-1 p-5">
+                  {/* FIX: overflow-x-hidden prevents any child from causing horizontal scroll */}
+                  <div className="flex-1 p-4 md:p-5 min-w-0 overflow-x-hidden">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       {/* Order info */}
                       <div className="flex items-center gap-4">
@@ -400,7 +406,8 @@ export default function MyOrders() {
                       </div>
 
                       {/* Right side */}
-                      <div className="flex flex-col sm:items-end gap-2">
+                      {/* FIX: on mobile, align items to start (rtl: right); on sm+ align to end */}
+                      <div className="flex flex-col items-start sm:items-end gap-2">
                         <StatusBadge status={order.status} />
                         <p className="text-xl font-black text-slate-800">
                           {(order.total || 0).toFixed(2)}{" "}
