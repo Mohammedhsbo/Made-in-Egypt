@@ -52,11 +52,11 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Phone size={18} className="shrink-0" />
-                <span dir="ltr">+20 12 3456 7890</span>
+                <span dir="ltr">+20 10 2042 6246</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail size={18} className="shrink-0" />
-                <span>support@store.com</span>
+                <span>madeinegyptt2@gmail.com</span>
               </li>
             </ul>
           </div>

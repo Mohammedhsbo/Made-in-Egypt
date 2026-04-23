@@ -28,8 +28,8 @@ const STATUS_CONFIG = {
     classes: "bg-yellow-50 text-yellow-700 border-yellow-200",
     iconColor: "text-yellow-500",
   },
-  processing: {
-    label: "جاري التجهيز",
+  confirmed: {
+    label: "تم التأكيد",
     icon: Loader2,
     classes: "bg-blue-50 text-blue-700 border-blue-200",
     iconColor: "text-blue-500",
@@ -101,12 +101,12 @@ function OrderDetailModal({ orderId, onClose }) {
 
   return (
     <div 
-      className="fixed inset-0 z-500 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm "
+      className=" absolute inset-0 z-[var(--z-drawer)] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm  "
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100 sticky top-0 bg-white rounded-t-3xl z-10">
+        <div className=" flex items-center justify-between p-6 border-b border-gray-100 sticky top-0 bg-white rounded-t-3xl z-10">
           <div>
             <h2 className="text-xl font-black text-slate-800">تفاصيل الطلب</h2>
             {order && (
@@ -199,7 +199,7 @@ function OrderDetailModal({ orderId, onClose }) {
                       />
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-sm text-slate-800 truncate">
-                          {item.product?.title_ar || item.product?.title_en}
+                          {item.title_ar || item.title_en || item.product?.title_ar || item.product?.title_en || "منتج غير معروف"}
                         </p>
                         <p className="text-xs text-gray-400 mt-0.5">
                           الكمية: {item.quantity}
@@ -207,10 +207,7 @@ function OrderDetailModal({ orderId, onClose }) {
                       </div>
                       <p className="font-bold text-primary text-sm flex-shrink-0">
                         {(
-                          (item.product?.priceAfterDiscount ||
-                            item.product?.basePrice ||
-                            item.price ||
-                            0) * item.quantity
+                          (item.price || 0) * item.quantity
                         ).toFixed(2)}{" "}
                         EGP
                       </p>
@@ -232,7 +229,7 @@ function OrderDetailModal({ orderId, onClose }) {
                 <div className="text-left">
                   <p className="text-xs text-slate-400">الإجمالي</p>
                   <p className="text-2xl font-black">
-                    {order.totalPrice?.toFixed(2)}
+                    {(order.total || 0).toFixed(2)}
                     <span className="text-sm font-normal text-slate-400 mr-1">
                       EGP
                     </span>
@@ -271,7 +268,7 @@ export default function MyOrders() {
       const res = await api.get("/orders/my");
       const data =
         res.data?.data?.orders || res.data?.data || res.data || [];
-      setOrders([...data].reverse());
+      setOrders(data);
     } catch (err) {
       console.error(err);
       setError("فشل تحميل طلباتك. يرجى المحاولة مجدداً.");
@@ -365,7 +362,7 @@ export default function MyOrders() {
                           ? "bg-red-400"
                           : order.status === "shipped"
                             ? "bg-purple-400"
-                            : order.status === "processing"
+                            : order.status === "confirmed"
                               ? "bg-blue-400"
                               : "bg-yellow-400"
                     }`}
@@ -406,7 +403,7 @@ export default function MyOrders() {
                       <div className="flex flex-col sm:items-end gap-2">
                         <StatusBadge status={order.status} />
                         <p className="text-xl font-black text-slate-800">
-                          {order.totalPrice?.toFixed(2)}{" "}
+                          {(order.total || 0).toFixed(2)}{" "}
                           <span className="text-sm font-normal text-gray-400">
                             EGP
                           </span>

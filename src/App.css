@@ -49,8 +49,17 @@ body{
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/*
+  Z-index scale (low → high). Use these layers to avoid overlap bugs.
+  content: 0 | admin overlay: 40 | admin sidebar (mobile): 45 | site header: 50 | sheets / mobile drawers: 60
+*/
 :root {
   --radius: 0.625rem;
+  --z-content: 0;
+  --z-admin-overlay: 40;
+  --z-admin-sidebar: 45;
+  --z-header: 50;
+  --z-drawer: 60;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);

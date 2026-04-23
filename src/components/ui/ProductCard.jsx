@@ -10,13 +10,13 @@ export default function ProductCard({ product }) {
 
 
   const title =
-    product?.title_en ||
     product?.title_ar ||
+    product?.title_en ||
     "بدون عنوان";
 
   const description =
-    product?.description_en ||
     product?.description_ar ||
+    product?.description_en ||
     "";
 
   return (

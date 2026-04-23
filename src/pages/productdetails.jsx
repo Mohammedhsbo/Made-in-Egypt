@@ -41,12 +41,12 @@ export default function Productdetails() {
   if (!isLoading && !product) return null;
 
   // ===================== NORMALIZE DATA =====================
-  const title = product?.title_en || product?.title_ar || "";
-  const description = product?.description_en || product?.description_ar || "";
+  const title = product?.title_ar || product?.title_en || "";
+  const description = product?.description_ar || product?.description_en|| "";
   const price = product?.priceAfterDiscount || product?.basePrice || 0;
 
   const category =
-    product?.category?.name_en || product?.category?.name_ar || "";
+    product?.category?.name_ar || product?.category?.name_en || "";
 
   const images =
     product?.images?.length > 0

@@ -5,7 +5,6 @@ import { HiMenu, HiX } from "react-icons/hi";
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
 
-  // منع سكرول الصفحة لما السايدبار مفتوح
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "auto";
   }, [open]);
@@ -15,8 +14,7 @@ export default function Sidebar() {
       {/* زر الموبايل */}
       <button
         onClick={() => setOpen(true)}
-        className="md:hidden fixed top-4 right-4 z-[100] bg-gray-800 text-white p-3 rounded-lg shadow-lg"
-     
+        className="fixed top-[110px] right-3 z-[var(--z-header)] bg-gray-800 p-3 text-white shadow-lg md:hidden rounded-lg"
       >
         <HiMenu size={26}  />
       </button>
@@ -24,7 +22,7 @@ export default function Sidebar() {
       {/* Overlay */}
       {open && (
         <div
-          className="fixed inset-0 bg-black/50 z-[90] md:hidden transition-opacity"
+          className="fixed inset-0 z-[var(--z-admin-overlay)] bg-black/50 transition-opacity md:hidden"
           onClick={() => setOpen(false)}
         />
       )}
@@ -32,12 +30,10 @@ export default function Sidebar() {
       {/* Sidebar */}
       <aside
         className={`
-          fixed md:static top-0 right-0 h-full w-64
-          bg-gray-800 text-white flex flex-col p-6
-          z-[100]
-          transform transition-transform duration-300 ease-in-out
+         fixed top-[100px] right-0 z-[var(--z-admin-sidebar)] flex h-[calc(100vh-100px)] w-64 flex-col
+          transform bg-gray-800 p-6 text-white transition-transform duration-300 ease-in-out
+          md:static md:top-auto md:h-full md:translate-x-0
           ${open ? "translate-x-0" : "translate-x-full"}
-          md:translate-x-0
         `}
       >
         {/* Close button */}

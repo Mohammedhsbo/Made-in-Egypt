@@ -8,7 +8,7 @@ export default function Layout() {
     <div className="min-h-screen flex flex-col font-sans bg-gray-50/50">
        <Header />
        
-       <main className="flex-grow pt-[100px] md:pt-[120px] pb-12 overflow-x-hidden">
+       <main className="relative z-[var(--z-content)] flex-grow overflow-x-hidden pb-12 pt-[100px] md:pt-[120px]">
         <Outlet />
        </main>
        
