@@ -1,14 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FALLBACK_IMAGE, formatImageUrl } from "@/utils/formatImageUrl";
 
 export default function SafeImage({ src, alt, className, ...props }) {
-  const [currentSrc, setCurrentSrc] = useState(
-    formatImageUrl(src) || FALLBACK_IMAGE
-  );
-
-  useEffect(() => {
-    setCurrentSrc(formatImageUrl(src) || FALLBACK_IMAGE);
-  }, [src]);
+  const [failedImage, setFailedImage] = useState(null);
+  const currentSrc = failedImage?.src === src
+    ? FALLBACK_IMAGE
+    : formatImageUrl(src) || FALLBACK_IMAGE;
 
   return (
     <img
@@ -16,7 +13,7 @@ export default function SafeImage({ src, alt, className, ...props }) {
       alt={alt}
       className={className}
       referrerPolicy="no-referrer"
-      onError={() => setCurrentSrc(FALLBACK_IMAGE)}
+      onError={() => setFailedImage({ src })}
       {...props}
     />
   );
