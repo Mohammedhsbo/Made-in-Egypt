@@ -5,13 +5,17 @@ import {
   Search,
   ShoppingCart,
   Eye,
-  X,
+  ArrowLeft,
   CalendarCheck,
   Package,
   AlertTriangle,
   ChevronDown,
+  MapPin,
+  CreditCard,
 } from "lucide-react";
 import SafeImage from "@/components/ui/safe-image";
+import { useLanguage } from "@/context/language.context";
+import { useNavigate, useParams } from "react-router-dom";
 
 
 const STATUS_CONFIG = {
@@ -21,7 +25,7 @@ const STATUS_CONFIG = {
   },
   confirmed: {
     label: "جاري التجهيز",
-    classes: "bg-blue-50 text-blue-700 border-blue-200",
+    classes: "bg-emerald-50 text-emerald-800 border-emerald-200",
   },
   shipped: {
     label: "تم الشحن",
@@ -40,6 +44,7 @@ const STATUS_CONFIG = {
 const ALL_STATUSES = Object.keys(STATUS_CONFIG);
 
 function StatusBadge({ status }) {
+  const { t } = useLanguage();
   const cfg = STATUS_CONFIG[status] || {
     label: status,
     classes: "bg-gray-100 text-gray-600 border-gray-200",
@@ -48,12 +53,15 @@ function StatusBadge({ status }) {
     <span
       className={`inline-flex items-center px-2.5 py-1 rounded-md border text-xs font-bold ${cfg.classes}`}
     >
-      {cfg.label}
+      {t(cfg.label)}
     </span>
   );
 }
 
-function OrderDetailModal({ orderId, onClose }) {
+export function OrderDetailsPage() {
+  const { t, isArabic } = useLanguage();
+  const { id: orderId } = useParams();
+  const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -64,150 +72,154 @@ function OrderDetailModal({ orderId, onClose }) {
         const res = await api.get(`/orders/${orderId}`);
         setOrder(res.data?.data?.order || res.data?.data || res.data);
       } catch (err) {
-        setError("فشل تحميل تفاصيل الطلب.");
+        setError(t("Failed to load order details."));
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
     fetchOrder();
-  }, [orderId]);
+  }, [orderId, t]);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100 sticky top-0 bg-white rounded-t-3xl z-10">
-          <div>
-            <h2 className="text-xl font-black text-slate-800">تفاصيل الطلب</h2>
-            {order && (
-              <p className="text-xs text-gray-400 mt-0.5 font-mono">
-                #{order._id?.slice(-8).toUpperCase()}
-              </p>
-            )}
-          </div>
+    <div className="admin-page mx-auto w-full max-w-5xl">
+      <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
           <button
-            onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-500"
+            type="button"
+            onClick={() => navigate("/admin/orders")}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-900"
           >
-            <X size={20} />
+            <ArrowLeft size={17} className={isArabic ? "rotate-180" : ""} />
+            {t("Orders")}
+          </button>
+          <h1 className="mt-4">{t("Order Details")}</h1>
+          <p className="mt-1 text-sm text-slate-500" dir="ltr">
+            #{(order?._id || orderId)?.slice(-8).toUpperCase()}
+          </p>
+        </div>
+        {order && <StatusBadge status={order.status} />}
+      </header>
+      {loading ? (
+        <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
+          <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-primary" />
+          <p className="text-sm text-gray-500">{t("Loading order details...")}</p>
+        </div>
+      ) : error ? (
+        <div className="flex min-h-[35vh] flex-col items-center justify-center gap-3 rounded-2xl border border-rose-100 bg-white p-8 text-center text-rose-600">
+          <AlertTriangle size={36} />
+          <p className="font-semibold">{error}</p>
+          <button
+            type="button"
+            onClick={() => navigate("/admin/orders")}
+            className="mt-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"
+          >
+            {t("Orders")}
           </button>
         </div>
-
-        {/* Modal Body */}
-        <div className="p-6">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center min-h-[200px] gap-3">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
-              <p className="text-gray-500 text-sm">جاري التحميل...</p>
-            </div>
-          ) : error ? (
-            <div className="flex flex-col items-center justify-center min-h-[200px] gap-3 text-red-500">
-              <AlertTriangle size={36} />
-              <p className="font-semibold">{error}</p>
-            </div>
-          ) : order ? (
-            <div className="space-y-6">
-              {/* Status & Date */}
-              <div className="flex items-center justify-between bg-gray-50 rounded-2xl p-4">
-                <div>
-                  <p className="text-xs text-gray-400 mb-1">الحالة</p>
-                  <StatusBadge status={order.status} />
-                </div>
-                <div className="text-left">
-                  <p className="text-xs text-gray-400 mb-1">تاريخ الطلب</p>
-                  <p className="text-sm font-semibold text-slate-700">
-                    {new Date(order.createdAt).toLocaleDateString("ar-EG")}
-                  </p>
-                </div>
-              </div>
-
-              {/* Shipping Address */}
+      ) : order ? (
+        <div className="space-y-5">
+          <section className="grid gap-3 sm:grid-cols-2">
+            <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <div>
-                <h3 className="font-bold text-slate-700 mb-3 text-sm">
-                  بيانات الشحن
-                </h3>
-                <div className="bg-gray-50 rounded-2xl p-4 space-y-2 text-sm">
-                  <p>
-                    <span className="text-gray-400">الاسم:</span>{" "}
-                    <span className="font-semibold">
-                      {order.shippingAddress?.fullName}
-                    </span>
-                  </p>
-                  <p>
-                    <span className="text-gray-400">الهاتف:</span>{" "}
-                    <span className="font-semibold" dir="ltr">
-                      {order.shippingAddress?.phone}
-                    </span>
-                  </p>
-                  <p>
-                    <span className="text-gray-400">العنوان:</span>{" "}
-                    <span className="font-semibold">
-                      {order.shippingAddress?.address} –{" "}
-                      {order.shippingAddress?.city}
-                    </span>
-                  </p>
-                  <p>
-                    <span className="text-gray-400">الرمز البريدي:</span>{" "}
-                    <span className="font-semibold">
-                      {order.shippingAddress?.postalCode}
-                    </span>
-                  </p>
-                </div>
+                <p className="mb-1 text-xs font-semibold text-slate-500">{t("Payment method")}</p>
+                <p className="font-bold text-slate-800">
+                  {order.paymentMethod === "cash"
+                    ? t("نقداً عند الاستلام")
+                    : order.paymentMethod === "card"
+                      ? t("بطاقة")
+                      : order.paymentMethod || "—"}
+                </p>
               </div>
-
-              {/* Items */}
+              <CreditCard size={22} className="text-emerald-800/60" />
+            </div>
+            <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <div>
-                <h3 className="font-bold text-slate-700 mb-3 text-sm">
-                  المنتجات ({order.items?.length || 0})
-                </h3>
-                <div className="space-y-3">
-                  {(order.items || []).map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center gap-4 bg-gray-50 p-3 rounded-2xl border border-gray-100"
-                    >
-                      <SafeImage
-                        src={item.product}
-                        alt={item.product?.title_ar}
-                        className="w-14 h-14 object-cover rounded-xl border border-gray-100"
-                      />
-                      <div className="flex-1">
-                        <p className="font-bold text-sm text-slate-800 line-clamp-1">
-                          {item.product?.title_ar || item.product?.title_en}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          الكمية: {item.quantity}
-                        </p>
-                      </div>
-                      <p className="font-bold text-primary text-sm">
-                        {(
-                          (item.product?.priceAfterDiscount ||
-                            item.product?.basePrice ||
-                            item.price ||
-                            0) * item.quantity
-                        ).toFixed(2)}{" "}
-                        EGP
-                      </p>
-                    </div>
-                  ))}
-                </div>
+                <p className="mb-1 text-xs font-semibold text-slate-500">{t("Order date")}</p>
+                <p className="font-bold text-slate-800">
+                  {order.createdAt
+                    ? new Date(order.createdAt).toLocaleDateString(isArabic ? "ar-EG" : "en-US")
+                    : "—"}
+                </p>
               </div>
+              <CalendarCheck size={22} className="text-emerald-800/60" />
+            </div>
+          </section>
 
-              {/* Total */}
-              <div className="flex items-center justify-between bg-slate-900 text-white rounded-2xl px-6 py-4">
-                <span className="font-bold">الإجمالي الكلي</span>
-                <span className="text-2xl font-black">
-                  {order.total?.toFixed(2)} EGP
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div className="mb-4 flex items-center gap-2">
+              <MapPin size={19} className="text-emerald-800" />
+              <h2 className="font-bold text-slate-800">{t("Shipping information")}</h2>
+            </div>
+            <div className="grid gap-4 text-sm sm:grid-cols-2">
+              <p>
+                <span className="text-slate-500">{t("الاسم:")}</span>{" "}
+                <span className="font-semibold text-slate-800">{order.shippingAddress?.fullName || "—"}</span>
+              </p>
+              <p>
+                <span className="text-slate-500">{t("الهاتف:")}</span>{" "}
+                <span className="font-semibold text-slate-800" dir="ltr">{order.shippingAddress?.phone || "—"}</span>
+              </p>
+              <p>
+                <span className="text-slate-500">{t("العنوان:")}</span>{" "}
+                <span className="font-semibold text-slate-800">
+                  {[order.shippingAddress?.address, order.shippingAddress?.city].filter(Boolean).join(" – ") || "—"}
                 </span>
-              </div>
+              </p>
+              <p>
+                <span className="text-slate-500">{t("الرمز البريدي:")}</span>{" "}
+                <span className="font-semibold text-slate-800">{order.shippingAddress?.postalCode || "—"}</span>
+              </p>
             </div>
-          ) : null}
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <h2 className="mb-4 font-bold text-slate-800">
+              {t("Products")} ({order.items?.length || 0})
+            </h2>
+            <div className="space-y-3">
+              {(order.items || []).map((item, idx) => (
+                <div
+                  key={item._id || idx}
+                  className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 p-3 sm:gap-4"
+                >
+                  <SafeImage
+                    src={item.product}
+                    alt={item.product?.title_ar || item.product?.title_en || ""}
+                    className="h-14 w-14 shrink-0 rounded-xl border border-gray-100 bg-white object-cover"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="line-clamp-2 font-bold text-slate-800">
+                      {isArabic
+                        ? item.product?.title_ar || item.product?.title_en
+                        : item.product?.title_en || item.product?.title_ar}
+                    </p>
+                    <p className="mt-0.5 text-xs text-gray-500">
+                      {t("الكمية:")} {item.quantity}
+                    </p>
+                  </div>
+                  <p className="shrink-0 text-sm font-bold text-primary">
+                    {(
+                      (Number(item.product?.priceAfterDiscount) ||
+                        Number(item.product?.basePrice) ||
+                        Number(item.price) ||
+                        0) * (Number(item.quantity) || 0)
+                    ).toFixed(2)}{" "}
+                    EGP
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <div className="flex items-center justify-between gap-4 rounded-2xl bg-slate-900 px-5 py-4 text-white sm:px-6">
+            <span className="font-bold">{t("Order total")}</span>
+            <span className="text-xl font-black sm:text-2xl">
+              {Number(order.total || 0).toFixed(2)} EGP
+            </span>
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }
@@ -216,9 +228,10 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [updatingStatus, setUpdatingStatus] = useState(null);
   const { searchTerm, setSearchTerm } = useSearch();
+  const { t, isArabic } = useLanguage();
+  const navigate = useNavigate();
 
   const fetchOrders = async () => {
     setLoadingOrders(true);
@@ -230,7 +243,7 @@ export default function OrdersPage() {
       setOrders([...data].reverse());
     } catch (err) {
       console.error(err);
-      setError("فشل تحميل الطلبات. يرجى المحاولة لاحقاً.");
+      setError(t("فشل تحميل الطلبات. يرجى المحاولة لاحقاً."));
     } finally {
       setLoadingOrders(false);
     }
@@ -272,29 +285,29 @@ export default function OrdersPage() {
       : orders;
 
   return (
-    <div className="w-full">
+    <div className="admin-page w-full">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-black text-slate-800 tracking-tight">
-            متابعة الأوردرات
+            {t("متابعة الأوردرات")}
           </h1>
           <p className="text-gray-500 font-medium mt-1">
-            عرض حالة الطلبات وشحنات العملاء
+            {t("عرض حالة الطلبات وشحنات العملاء")}
           </p>
         </div>
 
-        <div className="relative w-full md:w-72">
+        <div className="relative w-full md:w-80">
           <Search
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+            className={`absolute top-1/2 -translate-y-1/2 text-gray-400 ${isArabic ? "right-3" : "left-3"}`}
             size={18}
           />
           <input
             type="text"
-            placeholder="البحث برقم الطلب أو اسم العميل..."
+            placeholder={t("البحث برقم الطلب أو اسم العميل...")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-white border border-gray-200 rounded-lg pr-10 pl-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 shadow-sm transition-all"
+            className={`w-full border px-4 py-3 text-sm shadow-sm transition-all ${isArabic ? "pr-10" : "pl-10"}`}
           />
         </div>
       </div>
@@ -304,7 +317,7 @@ export default function OrdersPage() {
         <div className="flex flex-col min-h-[40vh] justify-center items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
           <p className="font-semibold text-gray-500">
-            جاري تحميل الأوردرات  ...
+            {t("جاري تحميل الأوردرات  ...")}
           </p>
         </div>
       ) : error ? (
@@ -315,7 +328,7 @@ export default function OrdersPage() {
             onClick={fetchOrders}
             className="mt-2 px-6 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl border border-red-200 text-sm font-semibold transition-colors"
           >
-            إعادة المحاولة
+            {t("إعادة المحاولة")}
           </button>
         </div>
       ) : orders.length === 0 ? (
@@ -324,32 +337,32 @@ export default function OrdersPage() {
             <ShoppingCart size={40} className="text-gray-300" />
           </div>
           <h3 className="text-xl font-bold text-gray-800">
-            لا توجد طلبات مسجلة
+            {t("لا توجد طلبات مسجلة")}
           </h3>
           <p className="text-gray-500 text-sm">
-            لم يقم أي عميل بالطلب حتى الآن.
+            {t("لم يقم أي عميل بالطلب حتى الآن.")}
           </p>
         </div>
       ) : searchTerm?.length > 0 && filteredOrders.length === 0 ? (
         <div className="flex flex-col min-h-[30vh] justify-center items-center gap-4 py-12">
           <p className="text-gray-500 font-bold text-lg">
-            لم نعثر على أوردر يطابق "{searchTerm}"
+            {t("لم نعثر على أوردر يطابق")} "{searchTerm}"
           </p>
         </div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto min-h-[50vh]">
-            <table className="w-full text-right border-collapse min-w-[1100px]">
+            <table className={`w-full border-collapse min-w-[1100px] ${isArabic ? "text-right" : "text-left"}`}>
               <thead className="bg-gray-50/80 border-b border-gray-200 text-sm font-semibold text-gray-600">
                 <tr>
-                  <th className="py-4 px-6">رقم الطلب</th>
-                  <th className="py-4 px-6">التاريخ</th>
-                  <th className="py-4 px-6">العميل والتواصل</th>
-                  <th className="py-4 px-6">العنوان</th>
-                  <th className="py-4 px-6">طريقة الدفع</th>
-                  <th className="py-4 px-6 text-center">الإجمالي</th>
-                  <th className="py-4 px-6 text-center">الحالة</th>
-                  <th className="py-4 px-6 text-center">التفاصيل</th>
+                  <th className="py-4 px-6">{t("رقم الطلب")}</th>
+                  <th className="py-4 px-6">{t("التاريخ")}</th>
+                  <th className="py-4 px-6">{t("العميل والتواصل")}</th>
+                  <th className="py-4 px-6">{t("العنوان")}</th>
+                  <th className="py-4 px-6">{t("طريقة الدفع")}</th>
+                  <th className="py-4 px-6 text-center">{t("الإجمالي")}</th>
+                  <th className="py-4 px-6 text-center">{t("الحالة")}</th>
+                  <th className="py-4 px-6 text-center">{t("التفاصيل")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-sm">
@@ -371,14 +384,14 @@ export default function OrdersPage() {
                         <CalendarCheck size={14} className="text-primary" />
                         {order.createdAt
                           ? new Date(order.createdAt).toLocaleDateString(
-                              "ar-EG"
+                              isArabic ? "ar-EG" : "en-US"
                             )
                           : "—"}
                       </div>
                       <div className="text-xs text-gray-400 mt-1 pr-6">
                         {order.createdAt
                           ? new Date(order.createdAt).toLocaleTimeString(
-                              "ar-EG",
+                              isArabic ? "ar-EG" : "en-US",
                               { hour: "2-digit", minute: "2-digit" }
                             )
                           : ""}
@@ -413,9 +426,9 @@ export default function OrdersPage() {
                     <td className="py-4 px-6">
                       <span className="text-xs font-semibold text-slate-600">
                         {order.paymentMethod === "cash"
-                          ? " نقداً عند الاستلام"
+                          ? ` ${t("نقداً عند الاستلام")}`
                           : order.paymentMethod === "card"
-                            ? " بطاقة"
+                            ? ` ${t("بطاقة")}`
                             : order.paymentMethod || "—"}
                       </span>
                     </td>
@@ -468,9 +481,10 @@ export default function OrdersPage() {
                     {/* Detail Button */}
                     <td className="py-4 px-6 text-center">
                       <button
-                        onClick={() => setSelectedOrderId(order._id)}
+                        onClick={() => navigate(`/admin/orders/${order._id}`)}
                         className="bg-gray-50 text-gray-600 p-2 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors border border-gray-200"
-                        title="عرض التفاصيل"
+                        title={t("عرض التفاصيل")}
+                        aria-label={`${t("عرض التفاصيل")} #${order._id?.slice(-8).toUpperCase()}`}
                       >
                         <Eye size={16} />
                       </button>
@@ -484,18 +498,11 @@ export default function OrdersPage() {
           {/* Footer count */}
           <div className="px-6 py-3 border-t border-gray-100 bg-gray-50/50 text-xs text-gray-400 text-right">
             <Package size={12} className="inline ml-1" />
-            إجمالي الطلبات: {filteredOrders.length}
+            {t("إجمالي الطلبات:")} {filteredOrders.length}
           </div>
         </div>
       )}
 
-      {/* Order Detail Modal */}
-      {selectedOrderId && (
-        <OrderDetailModal
-          orderId={selectedOrderId}
-          onClose={() => setSelectedOrderId(null)}
-        />
-      )}
     </div>
   );
 }

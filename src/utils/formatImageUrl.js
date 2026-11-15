@@ -4,6 +4,12 @@ export const FALLBACK_IMAGE =
 export function formatImageUrl(url) {
   if (!url || typeof url !== "string") return "";
   
+  if (url.startsWith("/uploads/")) {
+    const apiBase = import.meta.env.VITE_API_URL || "";
+    const serverBase = apiBase.replace(/\/api\/?$/, "");
+    return `${serverBase}${url}`;
+  }
+
   // If it's already a direct link or not a Google Drive link, return as is
   if (!url.includes("drive.google.com") && !url.includes("google.com/open?id=")) {
     return url;

@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
-import api from "../../api/axios.base";
+import api, { markApiErrorHandled } from "../../api/axios.base";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useLanguage } from "@/context/language.context";
 
 export default function EditCoupon() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const [loading, setLoading] = useState(false);
 
@@ -34,8 +36,9 @@ export default function EditCoupon() {
         expireAt: c.expireAt ? c.expireAt.split("T")[0] : "",
         usageLimit: c.usageLimit || "",
       });
-    } catch {
-      toast.error("فشل تحميل الكوبون");
+    } catch (error) {
+      markApiErrorHandled(error);
+      toast.error(t("فشل تحميل الكوبون"));
     }
   }, [id]);
 
@@ -65,10 +68,11 @@ export default function EditCoupon() {
 
       await api.patch(`/coupons/${id}`, payload);
 
-      toast.success("تم تحديث الكوبون بنجاح");
+      toast.success(t("تم تحديث الكوبون بنجاح"));
       navigate("/admin/allcuppons");
     } catch (err) {
-      toast.error("فشل تحديث الكوبون");
+      markApiErrorHandled(err);
+      toast.error(t("فشل تحديث الكوبون"));
       console.log(err);
     } finally {
       setLoading(false);
@@ -76,37 +80,38 @@ export default function EditCoupon() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6" dir="rtl">
+    <div className="admin-page">
 
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            تعديل الكوبون
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-800">{t("Store catalog")}</p>
+          <h1 className="mt-1">
+            {t("تعديل الكوبون")}
           </h1>
-          <p className="text-gray-500 text-sm">
-            قم بتحديث بيانات الكوبون من هنا
+          <p className="mt-2 text-sm text-slate-500">
+            {t("قم بتحديث بيانات الكوبون من هنا")}
           </p>
         </div>
 
         <Link to="/admin/allcuppons">
-          <Button className="bg-black text-white hover:bg-gray-800">
-            الرجوع لكل الكوبونات
+          <Button className="h-11 rounded-xl bg-[var(--primary)] px-4 font-bold text-white shadow-sm hover:brightness-110">
+            {t("الرجوع لكل الكوبونات")}
           </Button>
         </Link>
 
       </div>
 
       {/* CARD */}
-      <div className="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl p-8">
+      <div className="mx-auto max-w-3xl rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_16px_44px_rgba(27,52,43,0.07)] sm:p-8">
 
         <form onSubmit={handleSubmit} className="space-y-6">
 
           {/* كود الكوبون */}
           <div>
             <label className="text-sm font-semibold text-gray-700">
-              كود الكوبون
+              {t("كود الكوبون")}
             </label>
             <input
               name="code"
@@ -117,31 +122,31 @@ export default function EditCoupon() {
                   code: e.target.value.toUpperCase(),
                 })
               }
-              placeholder="مثال: SALE20"
-              className="mt-2 w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-black outline-none"
+              placeholder={t("مثال: SALE20")}
+              className="mt-2 w-full border px-4 py-3"
             />
           </div>
 
           {/* نوع الخصم */}
           <div>
             <label className="text-sm font-semibold text-gray-700">
-              نوع الخصم
+              {t("نوع الخصم")}
             </label>
             <select
               name="discountType"
               value={formData.discountType}
               onChange={handleChange}
-              className="mt-2 w-full px-4 py-3 border rounded-xl"
+              className="mt-2 w-full border px-4 py-3"
             >
-              <option value="percent">نسبة مئوية (%)</option>
-              <option value="fixed">مبلغ ثابت</option>
+              <option value="percent">{t("نسبة مئوية (%)")}</option>
+              <option value="fixed">{t("مبلغ ثابت")}</option>
             </select>
           </div>
 
           {/* قيمة الخصم */}
           <div>
             <label className="text-sm font-semibold text-gray-700">
-              قيمة الخصم
+              {t("قيمة الخصم")}
             </label>
             <input
               type="number"
@@ -149,7 +154,7 @@ export default function EditCoupon() {
               value={formData.discountValue}
               onChange={handleChange}
               placeholder="20"
-              className="mt-2 w-full px-4 py-3 border rounded-xl"
+              className="mt-2 w-full border px-4 py-3"
             />
           </div>
 
@@ -158,7 +163,7 @@ export default function EditCoupon() {
 
             <div>
               <label className="text-sm font-semibold text-gray-700">
-                أقل قيمة للسلة
+                {t("أقل قيمة للسلة")}
               </label>
               <input
                 type="number"
@@ -166,13 +171,13 @@ export default function EditCoupon() {
                 value={formData.minCartPrice}
                 onChange={handleChange}
                 placeholder="100"
-                className="mt-2 w-full px-4 py-3 border rounded-xl"
+                className="mt-2 w-full border px-4 py-3"
               />
             </div>
 
             <div>
               <label className="text-sm font-semibold text-gray-700">
-                أقصى خصم
+                {t("أقصى خصم")}
               </label>
               <input
                 type="number"
@@ -180,26 +185,26 @@ export default function EditCoupon() {
                 value={formData.maxDiscountAmount}
                 onChange={handleChange}
                 placeholder="50"
-                className="mt-2 w-full px-4 py-3 border rounded-xl"
+                className="mt-2 w-full border px-4 py-3"
               />
             </div>
 
             <div>
               <label className="text-sm font-semibold text-gray-700">
-                تاريخ الانتهاء
+                {t("تاريخ الانتهاء")}
               </label>
               <input
                 type="date"
                 name="expireAt"
                 value={formData.expireAt}
                 onChange={handleChange}
-                className="mt-2 w-full px-4 py-3 border rounded-xl"
+                className="mt-2 w-full border px-4 py-3"
               />
             </div>
 
             <div>
               <label className="text-sm font-semibold text-gray-700">
-                حد الاستخدام
+                {t("حد الاستخدام")}
               </label>
               <input
                 type="number"
@@ -207,7 +212,7 @@ export default function EditCoupon() {
                 value={formData.usageLimit}
                 onChange={handleChange}
                 placeholder="100"
-                className="mt-2 w-full px-4 py-3 border rounded-xl"
+                className="mt-2 w-full border px-4 py-3"
               />
             </div>
 
@@ -217,9 +222,9 @@ export default function EditCoupon() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition font-semibold"
+            className="w-full rounded-xl bg-[var(--primary)] py-3 font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading ? "جارٍ الحفظ..." : "حفظ التعديلات"}
+            {loading ? t("جارٍ الحفظ...") : t("حفظ التعديلات")}
           </button>
 
         </form>

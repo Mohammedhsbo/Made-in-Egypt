@@ -10,13 +10,14 @@ import Perfumes from "./pages/perfumes";
 import ProductDetails from "./pages/productdetails";
 import Socks from "./pages/socks";
 import Layout from "./layout";
+import CategoryProducts from "./pages/category-products";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./context/queryClient";
 import { SearchContextProvider } from "./context/searchContext";
 import { CartContextProvider } from "./context/cartContext";
 import { Toaster } from "@/components/ui/sonner";
 import Admin from "./pages/admin/dashboard";
-import Orders from "./pages/admin/order";
+import Orders, { OrderDetailsPage } from "./pages/admin/order";
 import AdminLayout from "./pages/admin/layout";
 import Register from "./pages/user system/register";
 import Login from "./pages/user system/login";
@@ -24,7 +25,7 @@ import ForgotPassword from "./pages/user system/forgot-password";
 import VerifyOtp from "./pages/user system/verify-otp";
 import VerifyEmail from "./pages/user system/verify-email";
 import Profile from "./pages/user system/profile";
-import MyOrders from "./pages/user system/userorders";
+import MyOrders, { MyOrderDetailsPage } from "./pages/user system/userorders";
 import { AuthProvider } from "./context/auth.context";
 import AdminRoute from "./pages/admin/adminRoute";
 import CreateProduct from "./pages/admin/createproduct";
@@ -34,6 +35,11 @@ import EditCategory from "./pages/admin/editcategory";
 import Allcuppons from "./pages/admin/allcuppons";
 import Creaatecuppons from "./pages/admin/createcuppon";
 import Editcoupons from "./pages/admin/editcoupons";
+import BrandsPage from "./pages/admin/managebrands";
+import BrandFormPage from "./pages/admin/brand-form";
+import HomepageOfferPage from "./pages/admin/homepage-offer";
+import BrandProducts from "./pages/brand-products";
+import { LanguageProvider } from "./context/language.context";
 
 
 
@@ -51,6 +57,8 @@ export default function App() {
         { path: "perfumes", element: <Perfumes /> },
         { path: "productdetails/:id", element: <ProductDetails /> },
         { path: "socks", element: <Socks /> },
+        { path: "categories/:id", element: <CategoryProducts /> },
+        { path: "brands/:slug", element: <BrandProducts /> },
         { path: "register", element: <Register /> },
         { path: "login", element: <Login /> },
         { path: "forgot-password", element: <ForgotPassword /> },
@@ -58,6 +66,7 @@ export default function App() {
         { path: "verify-email", element: <VerifyEmail /> },
         { path: "profile", element: <Profile /> },
         { path: "my-orders", element: <MyOrders /> },
+        { path: "my-orders/:id", element: <MyOrderDetailsPage /> },
         {
           path: "/admin",
           element: (
@@ -68,15 +77,20 @@ export default function App() {
 
           children: [
             { index: true, element: <Admin /> },
+            { path: "offer", element: <HomepageOfferPage /> },
             { path: "createproduct", element: <CreateProduct /> },
             {
               path: "editproduct/:id",
               element: <CreateProduct />,
             },
             { path: "managecategories", element: < Mangenecategory/> },
+            { path: "managebrands", element: <BrandsPage /> },
+            { path: "managebrands/create", element: <BrandFormPage /> },
+            { path: "managebrands/:id/edit", element: <BrandFormPage /> },
             {path: "editcategory/:id", element: <EditCategory /> },
             {path:"createcategory", element: <CreateCategory />},
             { path: "orders", element: <Orders /> },
+            { path: "orders/:id", element: <OrderDetailsPage /> },
             {path:"create-cuppons", element: <Creaatecuppons />},
             {
               path: "allcuppons",
@@ -98,15 +112,17 @@ export default function App() {
   ]);
 
   return (
-    <AuthProvider>
-      <CartContextProvider>
-        <SearchContextProvider>
-          <QueryClientProvider client={queryClient}>
-            <RouterProvider router={router} />
-            <Toaster />
-          </QueryClientProvider>
-        </SearchContextProvider>
-      </CartContextProvider>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <CartContextProvider>
+          <SearchContextProvider>
+            <QueryClientProvider client={queryClient}>
+              <RouterProvider router={router} />
+              <Toaster />
+            </QueryClientProvider>
+          </SearchContextProvider>
+        </CartContextProvider>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }

@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
-import api from "../api/axios.base";
+import api, { markApiErrorHandled } from "../api/axios.base";
 import { useAuth } from "./auth.context";
+import { useLanguage } from "./language.context";
 
 const CartContext = createContext();
 const GUEST_CART_STORAGE_KEY = "guest_cart";
@@ -37,6 +38,7 @@ export function CartContextProvider({ children }) {
   const [cart, setCart] = useState({ items: [] });
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const { t } = useLanguage();
   const isLoggedIn = Boolean(user && localStorage.getItem("token"));
 
   const mergeGuestCartIntoServerCart = useCallback(async () => {
@@ -138,7 +140,7 @@ export function CartContextProvider({ children }) {
       const nextCart = { ...current, items: nextItems };
       setCart(nextCart);
       saveGuestCart(nextCart);
-      toast.success("تم إضافة المنتج للسلة");
+      toast.success(t("تم إضافة المنتج للسلة"));
       return;
     }
 
@@ -149,10 +151,11 @@ export function CartContextProvider({ children }) {
       });
 
       setCart(res.data.data.cart);
-      toast.success("تم إضافة المنتج للسلة");
+      toast.success(t("تم إضافة المنتج للسلة"));
     } catch (err) {
       console.log(err);
-      toast.error("فشل إضافة المنتج");
+      markApiErrorHandled(err);
+      toast.error(t("فشل إضافة المنتج"));
     }
   };
 
@@ -181,7 +184,8 @@ export function CartContextProvider({ children }) {
       setCart(res.data.data.cart);
     } catch (err) {
       console.log(err);
-      toast.error("فشل تحديث الكمية");
+      markApiErrorHandled(err);
+      toast.error(t("فشل تحديث الكمية"));
     }
   };
 
@@ -195,7 +199,7 @@ export function CartContextProvider({ children }) {
       };
       setCart(nextCart);
       saveGuestCart(nextCart);
-      toast.success("تم حذف المنتج");
+      toast.success(t("تم حذف المنتج"));
       return;
     }
 
@@ -203,10 +207,11 @@ export function CartContextProvider({ children }) {
       const res = await api.delete(`/cart/${id}`);
 
       setCart(res.data.data.cart);
-      toast.success("تم حذف المنتج");
+      toast.success(t("تم حذف المنتج"));
     } catch (err) {
       console.log(err);
-      toast.error("فشل الحذف");
+      markApiErrorHandled(err);
+      toast.error(t("فشل الحذف"));
     }
   };
 
@@ -216,7 +221,7 @@ export function CartContextProvider({ children }) {
       const emptyCart = { items: [] };
       setCart(emptyCart);
       saveGuestCart(emptyCart);
-      toast.success("تم تفريغ السلة");
+      toast.success(t("تم تفريغ السلة"));
       return;
     }
 
@@ -224,10 +229,11 @@ export function CartContextProvider({ children }) {
       await api.delete("/cart");
 
       setCart({ items: [] });
-      toast.success("تم تفريغ السلة");
+      toast.success(t("تم تفريغ السلة"));
     } catch (err) {
       console.log(err);
-      toast.error("فشل تفريغ السلة");
+      markApiErrorHandled(err);
+      toast.error(t("فشل تفريغ السلة"));
     }
   };
 

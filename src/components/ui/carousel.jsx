@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useLanguage } from "@/context/language.context"
 
 const CarouselContext = React.createContext(null)
 
@@ -148,6 +149,7 @@ function CarouselPrevious({
   ...props
 }) {
   const { orientation, scrollPrev, canScrollPrev } = useCarousel()
+  const { t } = useLanguage()
 
   return (
     <Button
@@ -161,7 +163,7 @@ function CarouselPrevious({
       onClick={scrollPrev}
       {...props}>
       <ArrowLeft />
-      <span className="sr-only">Previous slide</span>
+      <span className="sr-only">{t("Previous slide")}</span>
     </Button>
   );
 }
@@ -173,6 +175,7 @@ function CarouselNext({
   ...props
 }) {
   const { orientation, scrollNext, canScrollNext } = useCarousel()
+  const { t } = useLanguage()
 
   return (
     <Button
@@ -186,7 +189,7 @@ function CarouselNext({
       onClick={scrollNext}
       {...props}>
       <ArrowRight />
-      <span className="sr-only">Next slide</span>
+      <span className="sr-only">{t("Next slide")}</span>
     </Button>
   );
 }

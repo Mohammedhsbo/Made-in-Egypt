@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import api from "../../api/axios.base";
+import api, { markApiErrorHandled } from "../../api/axios.base";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/context/language.context";
 
 export default function Managecuppons() {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     code: "",
     discountType: "percent",
@@ -39,7 +41,7 @@ export default function Managecuppons() {
 
       await api.post("/coupons", payload);
 
-      toast.success("تم إضافة الكوبون بنجاح");
+      toast.success(t("تم إضافة الكوبون بنجاح"));
 
       setFormData({
         code: "",
@@ -51,45 +53,47 @@ export default function Managecuppons() {
         usageLimit: "",
       });
     } catch (error) {
-      toast.error(error?.response?.data?.message || "حدث خطأ");
+      markApiErrorHandled(error);
+      toast.error(error?.response?.data?.message || t("حدث خطأ"));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-6" dir="rtl">
+    <div className="admin-page">
 
       {/* HEADER */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
 
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">
-            إدارة الكوبونات
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-800">{t("Store catalog")}</p>
+          <h1 className="mt-1">
+            {t("إدارة الكوبونات")}
           </h1>
-          <p className="text-gray-500 text-sm mt-1">
-            إنشاء وإدارة كوبونات الخصم بسهولة
+          <p className="mt-2 text-sm text-slate-500">
+            {t("إنشاء وإدارة كوبونات الخصم بسهولة")}
           </p>
         </div>
 
         <Link to="/admin/allcuppons">
-          <Button className="bg-black text-white hover:bg-gray-800 px-5 py-2 rounded-xl">
-            كل الكوبونات
+          <Button className="h-11 rounded-xl bg-[var(--primary)] px-4 font-bold text-white shadow-sm hover:brightness-110">
+            {t("كل الكوبونات")}
           </Button>
         </Link>
 
       </div>
 
       {/* CARD */}
-      <div className="max-w-3xl mx-auto bg-white/80 backdrop-blur-xl shadow-2xl rounded-2xl p-8 border border-gray-200">
+      <div className="mx-auto max-w-3xl rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_16px_44px_rgba(27,52,43,0.07)] sm:p-8">
 
         {/* TITLE */}
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-800">
-            إنشاء كوبون جديد
+          <h2 className="text-2xl font-bold text-slate-900">
+            {t("إنشاء كوبون جديد")}
           </h2>
-          <p className="text-gray-500 text-sm">
-            أدخل بيانات الكوبون بشكل صحيح
+          <p className="text-sm text-slate-500">
+            {t("أدخل بيانات الكوبون بشكل صحيح")}
           </p>
         </div>
 
@@ -98,7 +102,7 @@ export default function Managecuppons() {
           {/* CODE */}
           <div>
             <label className="text-sm font-semibold text-gray-700">
-              كود الكوبون
+              {t("كود الكوبون")}
             </label>
             <input
               name="code"
@@ -109,31 +113,31 @@ export default function Managecuppons() {
                   code: e.target.value.toUpperCase(),
                 })
               }
-              placeholder="مثال: SALE20"
-              className="mt-2 w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-black outline-none"
+              placeholder={t("مثال: SALE20")}
+              className="mt-2 w-full border px-4 py-3"
             />
           </div>
 
           {/* TYPE */}
           <div>
             <label className="text-sm font-semibold text-gray-700">
-              نوع الخصم
+              {t("نوع الخصم")}
             </label>
             <select
               name="discountType"
               value={formData.discountType}
               onChange={handleChange}
-              className="mt-2 w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-black"
+              className="mt-2 w-full border px-4 py-3"
             >
-              <option value="percent">نسبة مئوية (%)</option>
-              <option value="fixed">مبلغ ثابت</option>
+              <option value="percent">{t("نسبة مئوية (%)")}</option>
+              <option value="fixed">{t("مبلغ ثابت")}</option>
             </select>
           </div>
 
           {/* VALUE */}
           <div>
             <label className="text-sm font-semibold text-gray-700">
-              قيمة الخصم
+              {t("قيمة الخصم")}
             </label>
             <input
               type="number"
@@ -141,7 +145,7 @@ export default function Managecuppons() {
               value={formData.discountValue}
               onChange={handleChange}
               placeholder="20"
-              className="mt-2 w-full px-4 py-3 border rounded-xl"
+              className="mt-2 w-full border px-4 py-3"
             />
           </div>
 
@@ -150,7 +154,7 @@ export default function Managecuppons() {
 
             <div>
               <label className="text-sm font-semibold text-gray-700">
-                أقل قيمة للسلة
+                {t("أقل قيمة للسلة")}
               </label>
               <input
                 type="number"
@@ -158,13 +162,13 @@ export default function Managecuppons() {
                 value={formData.minCartPrice}
                 onChange={handleChange}
                 placeholder="100"
-                className="mt-2 w-full px-4 py-3 border rounded-xl"
+                className="mt-2 w-full border px-4 py-3"
               />
             </div>
 
             <div>
               <label className="text-sm font-semibold text-gray-700">
-                أقصى خصم
+                {t("أقصى خصم")}
               </label>
               <input
                 type="number"
@@ -172,26 +176,26 @@ export default function Managecuppons() {
                 value={formData.maxDiscountAmount}
                 onChange={handleChange}
                 placeholder="50"
-                className="mt-2 w-full px-4 py-3 border rounded-xl"
+                className="mt-2 w-full border px-4 py-3"
               />
             </div>
 
             <div>
               <label className="text-sm font-semibold text-gray-700">
-                تاريخ الانتهاء
+                {t("تاريخ الانتهاء")}
               </label>
               <input
                 type="date"
                 name="expireAt"
                 value={formData.expireAt}
                 onChange={handleChange}
-                className="mt-2 w-full px-4 py-3 border rounded-xl"
+                className="mt-2 w-full border px-4 py-3"
               />
             </div>
 
             <div>
               <label className="text-sm font-semibold text-gray-700">
-                حد الاستخدام
+                {t("حد الاستخدام")}
               </label>
               <input
                 type="number"
@@ -199,7 +203,7 @@ export default function Managecuppons() {
                 value={formData.usageLimit}
                 onChange={handleChange}
                 placeholder="100"
-                className="mt-2 w-full px-4 py-3 border rounded-xl"
+                className="mt-2 w-full border px-4 py-3"
               />
             </div>
 
@@ -209,9 +213,9 @@ export default function Managecuppons() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition font-semibold"
+            className="w-full rounded-xl bg-[var(--primary)] py-3 font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading ? "جارٍ الإنشاء..." : "إنشاء الكوبون"}
+            {loading ? t("جارٍ الإنشاء...") : t("إنشاء الكوبون")}
           </button>
 
         </form>

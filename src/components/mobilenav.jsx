@@ -11,15 +11,17 @@ import {
 import { Menu, LogIn, UserPlus, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/auth.context";
+import { useLanguage } from "@/context/language.context";
 
 export default function MobileNav({ navitems }) {
   const { user } = useAuth();
+  const { t, isArabic, toggleLanguage } = useLanguage();
   
   return (
     <Sheet>
       {/* Trigger */}
       <SheetTrigger asChild>
-        <button className="p-2 -mr-2 text-gray-700 hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-lg">
+        <button aria-label={t("Open navigation menu")} className="rounded-lg p-2 -mr-2 text-white transition-colors hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/50">
           <Menu size={28} />
         </button>
       </SheetTrigger>
@@ -28,13 +30,13 @@ export default function MobileNav({ navitems }) {
       <SheetContent side="right" className="flex flex-col p-6 w-[80vw] sm:w-[350px]">
         {/* Header for accessibility */}
         <SheetHeader className="text-right">
-          <SheetTitle className="sr-only">القائمة الرئيسية</SheetTitle>
-          <SheetDescription className="sr-only">أقسام المتجر وحسابك</SheetDescription>
+          <SheetTitle className="sr-only">{t("القائمة الرئيسية")}</SheetTitle>
+          <SheetDescription className="sr-only">{t("أقسام المتجر وحسابك")}</SheetDescription>
         </SheetHeader>
 
         {/* Logo */}
         <div className="flex justify-center border-b pb-6 mb-6">
-          <img src={Logo} alt="شعار الموقع" className="h-12 object-contain" />
+          <img src={Logo} alt={t("MADE IN EGYPT")} className="h-12 object-contain" />
         </div>
 
         {/* Links */}
@@ -45,7 +47,7 @@ export default function MobileNav({ navitems }) {
                 to={item.link}
                 className="text-gray-800 text-[17px] font-medium hover:text-primary hover:bg-gray-50 rounded-lg p-3 transition-colors text-right"
               >
-                {item.name}
+                {t(item.name)}
               </Link>
             </SheetTrigger>
           ))}
@@ -55,7 +57,7 @@ export default function MobileNav({ navitems }) {
                 to="/admin"
                 className="text-primary font-bold hover:text-primary/80 hover:bg-primary/5 rounded-lg p-3 transition-colors text-right"
               >
-                لوحة التحكم
+                {t("لوحة التحكم")}
               </Link>
             </SheetTrigger>
           )}
@@ -68,13 +70,13 @@ export default function MobileNav({ navitems }) {
               <SheetTrigger asChild>
                 <Link to="/login" className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">
                   <LogIn size={20} />
-                  تسجيل الدخول
+                  {t("تسجيل الدخول")}
                 </Link>
               </SheetTrigger>
               <SheetTrigger asChild>
                 <Link to="/register" className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors shadow-sm">
                   <UserPlus size={20} />
-                  حساب جديد
+                  {t("حساب جديد")}
                 </Link>
               </SheetTrigger>
             </>
@@ -84,11 +86,14 @@ export default function MobileNav({ navitems }) {
                   <div className="bg-primary/10 p-2 rounded-full text-primary">
                     <User size={20} />
                   </div>
-                  الملف الشخصي
+                  {t("الملف الشخصي")}
                 </Link>
               </SheetTrigger>
           )}
         </div>
+        <button type="button" onClick={toggleLanguage} className="mt-4 rounded-lg border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+          {isArabic ? "English" : "العربية"}
+        </button>
       </SheetContent>
     </Sheet>
   );

@@ -1,124 +1,239 @@
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Logo from "../assets/logo.png";
-import { ShoppingCart, Search, User } from "lucide-react";
-import MobileNav from "./mobilenav";
+import { ChevronDown, Globe, LogIn, LogOut, Search, ShoppingCart, User, UserPlus } from "lucide-react";
 import { useSearch } from "../context/searchContext";
 import { useAuth } from "../context/auth.context";
 import { useCart } from "../context/cartContext";
-import { Button } from "@/components/ui/button";
-import { MAIN_NAV_ITEMS } from "@/constants/navigation";
-
+import { useLanguage } from "@/context/language.context";
 
 export default function Header() {
   const { searchTerm, setSearchTerm } = useSearch();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { cart } = useCart();
-  
- const cartItemsCount = cart?.items?.reduce(
-  (acc, item) => acc + item.quantity,
-  0
-) || 0;
+  const { t, isArabic, toggleLanguage } = useLanguage();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  const cartItemsCount = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
+
+  const handleLogout = () => {
+    logout();
+    setMenuOpen(false);
+    window.location.href = "/login";
+  };
 
   return (
-    <header className="fixed top-0 left-0 z-[var(--z-header)] w-full bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 h-[70px] lg:h-[120px] flex items-center justify-between gap-4 lg:gap-8">
-        
-        {/* Mobile Nav Toggle */}
-        <div className="lg:hidden flex flex-1 items-center">
-           <MobileNav navitems={MAIN_NAV_ITEMS} />
-        </div>
+    <header className="sticky top-0 z-[var(--z-header)] w-full bg-[var(--primary)] text-white shadow-[0_8px_20px_rgba(26,58,52,0.16)]">
+      <div className="relative grid h-16 w-full grid-cols-[auto_1fr_auto] items-center gap-2 px-3 sm:px-4 md:flex md:gap-4 md:px-8 xl:px-12">
+        <button
+          type="button"
+          onClick={() => setSearchOpen((open) => !open)}
+          aria-label={searchOpen ? t("Close search") : t("Search products...")}
+          aria-expanded={searchOpen}
+        className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/10 md:hidden"
+        >
+          <Search size={21} />
+        </button>
 
-        {/* Logo */}
-        <Link to="/" className="shrink-0 flex items-center justify-center lg:justify-start flex-1 lg:flex-none">
-          <img src={Logo} alt="logo" className="h-[56px] lg:h-[78px] object-contain py-2" />
+        <Link
+          to="/"
+          aria-label={t("MADE IN EGYPT")}
+          className="group absolute left-1/2 flex -translate-x-1/2 items-center gap-2 md:static md:translate-x-0 md:gap-2.5"
+        >
+          <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#d6b47f] p-[2px] shadow-[0_3px_10px_rgba(9,29,25,0.28)] transition-transform duration-300 group-hover:rotate-[-6deg] group-hover:scale-105 lg:h-10 lg:w-10">
+            <span className="flex h-full w-full items-center justify-center rounded-full border border-[#fff7e8]/80 bg-[#f8f0df]">
+              <img src={Logo} alt="" className="h-[85%] w-[85%] object-contain" />
+            </span>
+          </span>
+          <span className="flex flex-col leading-none">
+            <span className="text-[8px] font-bold tracking-[0.24em] text-white/70 sm:text-[9px]">MADE IN</span>
+            <span className="mt-1 flex items-center gap-1.5 text-[13px] font-black tracking-[0.18em] text-white sm:text-sm lg:text-base">
+              EGYPT
+              <span className="h-px w-3.5 bg-[#d6b47f] sm:w-5" aria-hidden="true" />
+            </span>
+          </span>
         </Link>
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center gap-6 flex-1 justify-center">
-          {MAIN_NAV_ITEMS.map((item, index) => (
-            <Link
-              key={index}
-              to={item.link}
-              className="text-gray-700 font-medium hover:text-primary transition-colors text-[17px] relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-primary after:transition-all hover:after:w-full"
-            >
-              {item.name}
-            </Link>
-          ))}
-          {user?.role === "admin" && (
-            <Link
-              to="/admin"
-              className="text-primary font-bold hover:text-primary/80 transition-colors text-[17px] bg-primary/10 px-3 py-1 rounded-md"
-            >
-              لوحة التحكم
-            </Link>
-          )}
-        </nav>
-
-        {/* Search Bar (Desktop) */}
-        <div className="hidden lg:flex flex-1 max-w-md relative group">
+        <div className="group relative hidden min-w-0 flex-1 md:block">
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="ابحث عن منتجك المفضل..."
-            className="w-full bg-gray-50 border border-gray-200 rounded-full pl-5 pr-12 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-white transition-all text-gray-800"
+            placeholder={t("Search products...")}
+            aria-label={t("Search products...")}
+            className="w-full rounded-full border border-white/15 bg-white/10 py-2 pl-5 pr-11 text-sm text-white outline-none transition placeholder:text-white/60 focus:border-white/50 focus:bg-white/15"
           />
-          <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" size={20} />
+          <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 transition-colors group-focus-within:text-white" size={18} />
         </div>
 
-        {/* Actions (Cart & Auth) */}
-        <div className="flex items-center gap-3 lg:gap-5 shrink-0 justify-end flex-1 lg:flex-none">
-          <div className="hidden sm:flex items-center gap-2 border-l border-gray-200 pl-3 lg:pl-5 ml-1 lg:ml-2">
-            {!user ? (
-              <>
-                <Link to="/login">
-                  <Button variant="ghost" className="font-semibold text-gray-700 hover:text-primary hover:bg-primary/10 transition-colors">
-                    دخول
-                  </Button>
-                </Link>
-                <Link to="/register">
-                  <Button className="font-semibold rounded-full shadow-sm hover:shadow text-white bg-primary transition-all">
-                    حساب جديد
-                  </Button>
-                </Link>
-              </>
-            ) : (
-              <Link to="/profile" className="flex items-center gap-2 hover:bg-gray-50 p-2 rounded-full transition-colors border border-transparent hover:border-gray-100">
-                <div className="h-9 w-9 bg-primary/10 border border-primary/20 rounded-full flex items-center justify-center text-primary font-bold">
-                  {user?.name?.charAt(0)?.toUpperCase() || <User size={18} />}
+        <div className="col-start-3 flex items-center justify-self-end gap-1 sm:gap-2 md:ml-auto">
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            aria-label={`Change language to ${isArabic ? "English" : "Arabic"}`}
+            title={isArabic ? "English" : "العربية"}
+            className="hidden h-10 items-center justify-center gap-2 rounded-full px-3 text-white transition-colors hover:bg-white/10 md:flex"
+          >
+            <Globe size={18} />
+            <span className="text-sm font-medium">{isArabic ? "English" : "العربية"}</span>
+          </button>
+
+          <div ref={menuRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setMenuOpen((prev) => !prev)}
+              className="flex h-10 w-10 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+              aria-label={t("Account menu")}
+              aria-expanded={menuOpen}
+              aria-haspopup="menu"
+              aria-controls="account-menu"
+            >
+              <span className="relative flex h-9 w-9 items-center justify-center rounded-full border border-white/25 bg-white/10 font-bold text-white">
+                {user?.name?.charAt(0)?.toUpperCase() || <User size={18} />}
+                <ChevronDown
+                  size={12}
+                  aria-hidden="true"
+                  className={`absolute -bottom-0.5 rounded-full bg-[var(--primary)] ${isArabic ? "-left-0.5" : "-right-0.5"}`}
+                />
+              </span>
+            </button>
+
+            {menuOpen && (
+              <div
+                id="account-menu"
+                role="menu"
+                aria-label={t("Account menu")}
+                className={`absolute ${isArabic ? "left-0 origin-top-left" : "right-0 origin-top-right"} top-full z-[var(--z-drawer)] mt-2 w-60 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-800 shadow-[0_18px_48px_rgba(15,35,29,0.24)] ring-1 ring-black/5`}
+              >
+                <div className="flex items-center gap-3 bg-[var(--primary)] px-4 py-4 text-white">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/25 bg-white/10 font-bold">
+                    {user?.name?.charAt(0)?.toUpperCase() || <User size={18} aria-hidden="true" />}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">
+                      {user?.name || t("Please sign in to continue")}
+                    </p>
+                    {user?.email && <p className="truncate text-xs text-white/70">{user.email}</p>}
+                  </div>
                 </div>
-                <span className="text-sm font-semibold text-gray-700 max-w-[100px] truncate hidden xl:block">
-                  {user?.name?.split(" ")[0]}
-                </span>
-              </Link>
+                <div className="py-1.5">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      toggleLanguage();
+                      setMenuOpen(false);
+                    }}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium transition-colors hover:bg-slate-50 focus-visible:bg-slate-50 focus-visible:outline-none md:hidden"
+                  >
+                    <Globe size={17} className="text-slate-500" aria-hidden="true" />
+                    {isArabic ? "English" : "العربية"}
+                  </button>
+                  {!user ? (
+                    <>
+                      <Link
+                        to="/login"
+                        onClick={() => setMenuOpen(false)}
+                        role="menuitem"
+                        className="flex items-center gap-3 border-t border-slate-100 px-4 py-3 text-sm font-medium transition-colors hover:bg-slate-50 focus-visible:bg-slate-50 focus-visible:outline-none"
+                      >
+                        <LogIn size={17} className="text-slate-500" aria-hidden="true" />
+                        {t("تسجيل الدخول")}
+                      </Link>
+                      <Link
+                        to="/register"
+                        onClick={() => setMenuOpen(false)}
+                        role="menuitem"
+                        className="flex items-center gap-3 border-t border-slate-100 px-4 py-3 text-sm font-medium transition-colors hover:bg-slate-50 focus-visible:bg-slate-50 focus-visible:outline-none"
+                      >
+                        <UserPlus size={17} className="text-slate-500" aria-hidden="true" />
+                        {t("حساب جديد")}
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        to="/profile"
+                        onClick={() => setMenuOpen(false)}
+                        role="menuitem"
+                        className="flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors hover:bg-slate-50 focus-visible:bg-slate-50 focus-visible:outline-none"
+                      >
+                        <User size={17} className="text-slate-500" aria-hidden="true" />
+                        {t("الملف الشخصي")}
+                      </Link>
+                      {user?.role === "admin" && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setMenuOpen(false)}
+                          role="menuitem"
+                          className="flex items-center gap-3 border-t border-slate-100 px-4 py-3 text-sm font-medium transition-colors hover:bg-slate-50 focus-visible:bg-slate-50 focus-visible:outline-none"
+                        >
+                          <span aria-hidden="true" className="text-base">⚙️</span>
+                          {t("لوحة التحكم")}
+                        </Link>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        role="menuitem"
+                        className="flex w-full items-center gap-3 border-t border-slate-100 px-4 py-3 text-start text-sm font-medium text-red-600 transition-colors hover:bg-red-50 focus-visible:bg-red-50 focus-visible:outline-none"
+                      >
+                        <LogOut size={17} aria-hidden="true" />
+                        {t("تسجيل الخروج")}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
             )}
           </div>
 
-          <Link to="/cart" className="relative p-2 hover:bg-gray-50 rounded-full transition-colors flex items-center justify-center">
-            <ShoppingCart size={26} className="text-gray-700" />
+          <Link to="/cart" aria-label={t("Shopping cart")} className="relative flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/10">
+            <ShoppingCart size={22} className="text-white" />
             {cartItemsCount > 0 && (
-              <span className="absolute top-0 right-0 lg:top-[-2px] lg:right-[-2px] bg-red-500 text-white text-[10px] font-bold h-5 w-5 rounded-full flex items-center justify-center shadow-sm border-2 border-white">
+              <span className="absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[var(--primary)] bg-red-500 text-[10px] font-bold text-white">
                 {cartItemsCount > 99 ? "99+" : cartItemsCount}
               </span>
             )}
           </Link>
-          
         </div>
       </div>
 
-      {/* Mobile Search - shown below header on mobile */}
-      <div className="lg:hidden px-4 pb-3 bg-white/95 transition-all">
-         <div className="relative group shadow-sm rounded-full overflow-hidden">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="ابحث عن منتجك المفضل..."
-            className="w-full bg-gray-50 border border-gray-200 pl-5 pr-12 py-2 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-[15px]"
-          />
-          <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 focus-within:text-primary" size={18} />
+      {searchOpen && (
+        <div className="border-t border-white/10 px-3 py-2 md:hidden">
+          <div className="group relative mx-auto max-w-7xl">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder={t("Search products...")}
+              aria-label={t("Search products...")}
+              className="w-full rounded-full border border-white/15 bg-white/10 py-2 pl-5 pr-11 text-sm text-white outline-none transition placeholder:text-white/60 focus:border-white/50 focus:bg-white/15"
+            />
+            <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 transition-colors group-focus-within:text-white" size={18} />
+          </div>
         </div>
-      </div>
+      )}
     </header>
   );
 }

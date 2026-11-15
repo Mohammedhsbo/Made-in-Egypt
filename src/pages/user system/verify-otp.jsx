@@ -3,15 +3,18 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { verifyOtpSchema } from "../../../utils/schmea.validation";
 import { resetPasswordRequest } from "@/services/auth.service";
+import { markApiErrorHandled } from "@/api/axios.base";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { KeyRound, Lock, Mail } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useLanguage } from "@/context/language.context";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
+  const { t } = useLanguage();
 
   const emailFromQuery = searchParams.get("email") || "";
 
@@ -37,11 +40,12 @@ export default function ResetPassword() {
         newPassword: data.password,
       });
 
-      toast.success("تم تغيير كلمة المرور بنجاح");
+      toast.success(t("تم تغيير كلمة المرور بنجاح"));
 
       navigate("/login");
     } catch (err) {
-      toast.error(err?.response?.data?.message || "رمز غير صالح أو منتهي");
+      markApiErrorHandled(err);
+      toast.error(err?.response?.data?.message || t("رمز غير صالح أو منتهي"));
     } finally {
       setLoading(false);
     }
@@ -51,10 +55,10 @@ export default function ResetPassword() {
     <div className="min-h-[70vh] flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-3xl border p-8 shadow-xl">
         <h1 className="text-2xl font-black text-center mb-2">
-          إعادة تعيين كلمة المرور
+          {t("إعادة تعيين كلمة المرور")}
         </h1>
         <p className="text-sm text-gray-500 text-center mb-6">
-          أدخل OTP وكلمة المرور الجديدة
+          {t("أدخل OTP وكلمة المرور الجديدة")}
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -65,7 +69,7 @@ export default function ResetPassword() {
             <input
               type="email"
               {...register("email")}
-              placeholder="البريد الإلكتروني"
+              placeholder={t("البريد الإلكتروني")}
               className="w-full rounded-xl border bg-gray-50 py-3 pr-11 pl-3"
             />
           </div>
@@ -79,7 +83,7 @@ export default function ResetPassword() {
             <input
               type="text"
               {...register("otp")}
-              placeholder="رمز التحقق OTP"
+              placeholder={t("رمز التحقق OTP")}
               className="w-full rounded-xl border bg-gray-50 py-3 pr-11 pl-3"
             />
           </div>
@@ -93,7 +97,7 @@ export default function ResetPassword() {
             <input
               type="password"
               {...register("password")}
-              placeholder="كلمة المرور الجديدة"
+              placeholder={t("كلمة المرور الجديدة")}
               className="w-full rounded-xl border bg-gray-50 py-3 pr-11 pl-3"
             />
           </div>
@@ -107,7 +111,7 @@ export default function ResetPassword() {
             <input
               type="password"
               {...register("confirmPassword")}
-              placeholder="تأكيد كلمة المرور"
+              placeholder={t("تأكيد كلمة المرور")}
               className="w-full rounded-xl border bg-gray-50 py-3 pr-11 pl-3"
             />
           </div>
@@ -118,7 +122,7 @@ export default function ResetPassword() {
           )}
 
           <Button type="submit" className="w-full py-6" disabled={loading}>
-            {loading ? "جاري التحديث..." : "تحديث كلمة المرور"}
+            {loading ? t("جاري التحديث...") : t("تحديث كلمة المرور")}
           </Button>
         </form>
 
@@ -126,7 +130,7 @@ export default function ResetPassword() {
           to="/forgot-password"
           className="mt-5 block text-center text-sm text-primary font-semibold"
         >
-          إعادة إرسال OTP
+          {t("إعادة إرسال OTP")}
         </Link>
       </div>
     </div>
