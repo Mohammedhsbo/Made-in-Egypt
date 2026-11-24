@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 import { useLanguage } from '@/context/language.context';
 
 export default function Footer() {
@@ -15,11 +15,6 @@ export default function Footer() {
             <p className="text-sm leading-relaxed mb-6">
               {t("نقدم لكم أفضل المنتجات بأعلى جودة وبأنسب الأسعار. تجربة تسوق سهلة وسريعة تجعلك تعود دائماً.")}
             </p>
-            <div className="flex gap-3">
-              <a href="#" className="rounded-full border border-white/15 bg-white/5 p-2 transition-colors hover:bg-white/10 hover:text-white"><Facebook size={18} /></a>
-              <a href="#" className="rounded-full border border-white/15 bg-white/5 p-2 transition-colors hover:bg-white/10 hover:text-white"><Twitter size={18} /></a>
-              <a href="#" className="rounded-full border border-white/15 bg-white/5 p-2 transition-colors hover:bg-white/10 hover:text-white"><Instagram size={18} /></a>
-            </div>
           </div>
 
           {/* Quick Links */}
@@ -37,10 +32,10 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">{t("خدمة العملاء")}</h3>
             <ul className="space-y-3 p-0 m-0 list-none">
-              <li><Link to="#" className="hover:text-white transition-colors">{t("من نحن")}</Link></li>
-              <li><Link to="#" className="hover:text-white transition-colors">{t("سياسة الخصوصية")}</Link></li>
-              <li><Link to="#" className="hover:text-white transition-colors">{t("الشروط والأحكام")}</Link></li>
-              <li><Link to="#" className="hover:text-white transition-colors">{t("سياسة الاسترجاع")}</Link></li>
+              <li><Link to="/customer-service/about" className="hover:text-white transition-colors">{t("من نحن")}</Link></li>
+              <li><Link to="/customer-service/privacy-policy" className="hover:text-white transition-colors">{t("سياسة الخصوصية")}</Link></li>
+              <li><Link to="/customer-service/terms-and-conditions" className="hover:text-white transition-colors">{t("الشروط والأحكام")}</Link></li>
+              <li><Link to="/customer-service/return-policy" className="hover:text-white transition-colors">{t("سياسة الاسترجاع")}</Link></li>
             </ul>
           </div>
 

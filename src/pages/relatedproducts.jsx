@@ -17,7 +17,7 @@ export default function RelatedProducts() {
     <div className="mt-10">
       <h2 className="text-2xl font-bold mb-4">{t("منتجات مشابهة")}</h2>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5 lg:grid-cols-5 lg:gap-6">
+      <div className="grid grid-cols-3 gap-3 md:grid-cols-4 md:gap-5 lg:grid-cols-5 lg:gap-6">
         {data.map((product) => (
           <ProductCard key={product._id} product={product} />
         ))}

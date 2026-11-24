@@ -1,8 +1,6 @@
 import "./App.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Cart from "./pages/cart";
 import Home from "./pages/home";
-import Checkout from "./pages/checkout";
 import Clothes from "./pages/clothes";
 import NotFound from "./pages/not-found";
 import Shoes from "./pages/shoes";
@@ -14,7 +12,6 @@ import CategoryProducts from "./pages/category-products";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./context/queryClient";
 import { SearchContextProvider } from "./context/searchContext";
-import { CartContextProvider } from "./context/cartContext";
 import { Toaster } from "@/components/ui/sonner";
 import Admin from "./pages/admin/dashboard";
 import Orders, { OrderDetailsPage } from "./pages/admin/order";
@@ -40,6 +37,8 @@ import BrandFormPage from "./pages/admin/brand-form";
 import HomepageOfferPage from "./pages/admin/homepage-offer";
 import BrandProducts from "./pages/brand-products";
 import { LanguageProvider } from "./context/language.context";
+import WhatsAppSettings from "./pages/admin/whatsapp-settings";
+import CustomerServicePage from "./pages/customer-service-page";
 
 
 
@@ -50,8 +49,6 @@ export default function App() {
       element: <Layout />,
       children: [
         { path: "/", element: <Home /> },
-        { path: "cart", element: <Cart /> },
-        { path: "checkout", element: <Checkout /> },
         { path: "clothes", element: <Clothes /> },
         { path: "shoes", element: <Shoes /> },
         { path: "perfumes", element: <Perfumes /> },
@@ -59,6 +56,7 @@ export default function App() {
         { path: "socks", element: <Socks /> },
         { path: "categories/:id", element: <CategoryProducts /> },
         { path: "brands/:slug", element: <BrandProducts /> },
+        { path: "customer-service/:page", element: <CustomerServicePage /> },
         { path: "register", element: <Register /> },
         { path: "login", element: <Login /> },
         { path: "forgot-password", element: <ForgotPassword /> },
@@ -91,6 +89,7 @@ export default function App() {
             {path:"createcategory", element: <CreateCategory />},
             { path: "orders", element: <Orders /> },
             { path: "orders/:id", element: <OrderDetailsPage /> },
+            { path: "settings/whatsapp", element: <WhatsAppSettings /> },
             {path:"create-cuppons", element: <Creaatecuppons />},
             {
               path: "allcuppons",
@@ -114,14 +113,12 @@ export default function App() {
   return (
     <LanguageProvider>
       <AuthProvider>
-        <CartContextProvider>
           <SearchContextProvider>
             <QueryClientProvider client={queryClient}>
               <RouterProvider router={router} />
               <Toaster />
             </QueryClientProvider>
           </SearchContextProvider>
-        </CartContextProvider>
       </AuthProvider>
     </LanguageProvider>
   );

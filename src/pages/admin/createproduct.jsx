@@ -46,6 +46,23 @@ export default function CreateProduct() {
     brand: "",
     imageCover: "",
     isFeatured: false,
+    moq: "",
+    unitOfMeasurement: "",
+    packagingUnit: "carton",
+    unitsPerCarton: "",
+    weightPerUnitKg: "",
+    wholesalePrice: "",
+    leadTimeMinDays: "",
+    leadTimeMaxDays: "",
+    flcQuantity20ft: "",
+    flcQuantity40ftHc: "",
+    cartonDimensions: "",
+    packagingDetails: "",
+    originCountry: "",
+    hsCode: "",
+    sku: "",
+    datasheetUrl: "",
+    catalogUrl: "",
   });
 
   // Fetch Categories
@@ -93,6 +110,23 @@ export default function CreateProduct() {
           brand: p.brand?._id || p.brand || "",
           imageCover: p.imageCover || "",
           isFeatured: Boolean(p.isFeatured),
+          moq: p.moq ?? "",
+          unitOfMeasurement: p.unitOfMeasurement || "",
+          packagingUnit: p.packagingUnit || (/kg|kilogram/i.test(p.unitOfMeasurement || "") ? "kg" : "carton"),
+          unitsPerCarton: p.unitsPerCarton ?? "",
+          weightPerUnitKg: p.weightPerUnitKg ?? "",
+          wholesalePrice: p.wholesalePrice ?? "",
+          leadTimeMinDays: p.leadTimeMinDays ?? "",
+          leadTimeMaxDays: p.leadTimeMaxDays ?? "",
+          flcQuantity20ft: p.flcQuantity20ft ?? "",
+          flcQuantity40ftHc: p.flcQuantity40ftHc ?? "",
+          cartonDimensions: p.cartonDimensions || "",
+          packagingDetails: p.packagingDetails || "",
+          originCountry: p.originCountry || "",
+          hsCode: p.hsCode || "",
+          sku: p.sku || "",
+          datasheetUrl: p.datasheetUrl || "",
+          catalogUrl: p.catalogUrl || "",
         });
         setImageCoverKey(p.imageCoverKey || "");
         setImageKeys(p.imageKeys || []);
@@ -145,6 +179,23 @@ export default function CreateProduct() {
         category: form.category,
         brand: form.brand || null,
         isFeatured: form.isFeatured,
+        moq: form.moq === "" ? null : Number(form.moq),
+        unitOfMeasurement: form.unitOfMeasurement,
+        packagingUnit: form.packagingUnit,
+        unitsPerCarton: form.unitsPerCarton === "" ? null : Number(form.unitsPerCarton),
+        weightPerUnitKg: form.weightPerUnitKg === "" ? null : Number(form.weightPerUnitKg),
+        wholesalePrice: form.wholesalePrice === "" ? null : Number(form.wholesalePrice),
+        leadTimeMinDays: form.leadTimeMinDays === "" ? null : Number(form.leadTimeMinDays),
+        leadTimeMaxDays: form.leadTimeMaxDays === "" ? null : Number(form.leadTimeMaxDays),
+        flcQuantity20ft: form.flcQuantity20ft === "" ? null : Number(form.flcQuantity20ft),
+        flcQuantity40ftHc: form.flcQuantity40ftHc === "" ? null : Number(form.flcQuantity40ftHc),
+        cartonDimensions: form.cartonDimensions,
+        packagingDetails: form.packagingDetails,
+        originCountry: form.originCountry,
+        hsCode: form.hsCode,
+        sku: form.sku,
+        datasheetUrl: form.datasheetUrl,
+        catalogUrl: form.catalogUrl,
       };
       if (form.imageCover) payload.imageCover = formatImageUrl(form.imageCover);
 
@@ -247,46 +298,226 @@ export default function CreateProduct() {
   };
 
   return (
-    <div className="admin-page mx-auto max-w-3xl rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_16px_44px_rgba(27,52,43,0.07)] sm:p-8">
-
-      <header className="mb-6">
-        <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-800">{t("Store catalog")}</p>
-        <h1 className="mt-1">
-          {isEdit ? t("تعديل المنتج") : t("إضافة منتج جديد")}
-        </h1>
+    <div className="admin-page mx-auto max-w-6xl">
+      <header className="mb-5">
+        <h1>{isEdit ? t("تعديل المنتج") : t("إضافة منتج جديد")}</h1>
       </header>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="admin-product-form space-y-5">
+        <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-7">
+          <div className="mb-5 flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-sm font-black text-emerald-800">01</span>
+            <h2 className="text-lg font-extrabold text-slate-900">{t("Product information")}</h2>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+              {t("العنوان بالعربي")}
+              <input name="title_ar" value={form.title_ar} onChange={handleChange} dir="rtl" className="w-full px-3 py-2.5" />
+            </label>
+            <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+              {t("English Title")}
+              <input name="title_en" value={form.title_en} onChange={handleChange} dir="ltr" className="w-full px-3 py-2.5" />
+            </label>
+            <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+              {t("الوصف بالعربي")}
+              <textarea name="description_ar" value={form.description_ar} onChange={handleChange} dir="rtl" rows={4} className="w-full resize-y px-3 py-2.5" />
+            </label>
+            <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+              {t("English Description")}
+              <textarea name="description_en" value={form.description_en} onChange={handleChange} dir="ltr" rows={4} className="w-full resize-y px-3 py-2.5" />
+            </label>
+          </div>
+        </section>
 
-        <input name="title_ar" value={form.title_ar} onChange={handleChange} placeholder={t("العنوان بالعربي")} dir="rtl" className="border px-3 py-2.5" />
+        <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-7">
+          <div className="mb-5 flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-sm font-black text-amber-800">02</span>
+            <h2 className="text-lg font-extrabold text-slate-900">{t("Price & inventory")}</h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+              {t("السعر الأساسي")}
+              <input name="basePrice" value={form.basePrice} onChange={handleChange} type="number" className="w-full px-3 py-2.5" />
+            </label>
+            <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+              {t("بعد الخصم")}
+              <input name="priceAfterDiscount" value={form.priceAfterDiscount} onChange={handleChange} type="number" className="w-full px-3 py-2.5" />
+            </label>
+            <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+              {t("المخزون المتاح")}
+              <input name="quantity" value={form.quantity} onChange={handleChange} type="number" className="w-full px-3 py-2.5" />
+            </label>
+            <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+              {t("آخر سعر معروف")}
+              <input name="wholesalePrice" value={form.wholesalePrice} onChange={handleChange} type="number" className="w-full px-3 py-2.5" />
+            </label>
+          </div>
+          <label className="mt-4 flex items-center gap-3 rounded-xl border border-rose-100 bg-rose-50/60 p-4 text-sm text-slate-700">
+            <input
+              name="isOnSale"
+              type="checkbox"
+              checked={form.isOnSale}
+              onChange={(event) => setForm((current) => ({ ...current, isOnSale: event.target.checked }))}
+              className="h-4 w-4 accent-rose-700"
+            />
+            <span>
+              <span className="block font-bold text-rose-800">{t("Show SALE label")}</span>
+              <span className="mt-1 block text-xs text-slate-500">{t("This label appears on storefront product cards.")}</span>
+            </span>
+          </label>
+        </section>
 
-        <input name="title_en" value={form.title_en} onChange={handleChange} placeholder={t("English Title")} className="border px-3 py-2.5" />
+        <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-7">
+          <div className="mb-5 flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-50 text-sm font-black text-sky-800">03</span>
+            <h2 className="text-lg font-extrabold text-slate-900">{t("Product categorization")}</h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+              {t("Category")}
+              <select name="category" value={form.category} onChange={handleChange} className="w-full px-3 py-2.5 text-gray-700">
+                <option value="">{t("اختر القسم (Category)")}</option>
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat._id}>
+                    {isArabic ? `${cat.name_ar} | ${cat.name_en}` : `${cat.name_en} | ${cat.name_ar}`}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+              {t("Brand")}
+              <select name="brand" value={form.brand} onChange={handleChange} className="w-full px-3 py-2.5 text-gray-700">
+                <option value="">{t("No brand")}</option>
+                {brands.map((brand) => (
+                  <option
+                    key={brand._id}
+                    value={brand._id}
+                    disabled={brand.isActive === false && brand._id !== form.brand}
+                  >
+                    {isArabic ? `${brand.name_ar} | ${brand.name_en}` : `${brand.name_en} | ${brand.name_ar}`}
+                    {brand.isActive === false ? ` (${t("Hidden")})` : ""}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </section>
 
-        <textarea name="description_ar" value={form.description_ar} onChange={handleChange} placeholder={t("الوصف بالعربي")} dir="rtl" className="border px-3 py-2.5" />
+        <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-7">
+          <div className="mb-5 flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-50 text-sm font-black text-violet-800">04</span>
+            <h2 className="text-lg font-extrabold text-slate-900">{t("B2B Product Information")}</h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+              {t("Minimum Order Quantity (MOQ)")}
+              <input name="moq" value={form.moq} onChange={handleChange} type="number" className="w-full px-3 py-2.5" />
+            </label>
+            <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+              {t("Unit of Measurement")}
+              <input name="unitOfMeasurement" value={form.unitOfMeasurement} onChange={handleChange} className="w-full px-3 py-2.5" />
+            </label>
+            <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+              {t("Product packaging unit")}
+              <select name="packagingUnit" value={form.packagingUnit} onChange={handleChange} className="w-full px-3 py-2.5">
+                <option value="carton">{t("Carton")}</option>
+                <option value="kg">{t("Kilogram")}</option>
+                <option value="unit">{t("Unit")}</option>
+              </select>
+            </label>
+            {form.packagingUnit === "carton" && (
+              <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+                {t("Units per carton")}
+                <input name="unitsPerCarton" value={form.unitsPerCarton} onChange={handleChange} type="number" min="0" className="w-full px-3 py-2.5" />
+              </label>
+            )}
+            {form.packagingUnit === "carton" ? (
+              <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+                {t("Weight (Carton)")}
+                <input name="weightPerUnitKg" value={form.weightPerUnitKg} onChange={handleChange} type="number" min="0" step="0.01" className="w-full px-3 py-2.5" />
+              </label>
+            ) : form.packagingUnit === "kg" ? (
+              <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+                {t("Weight per unit (kg)")}
+                <input name="weightPerUnitKg" value={form.weightPerUnitKg} onChange={handleChange} type="number" min="0" step="0.01" className="w-full px-3 py-2.5" />
+              </label>
+            ) : null}
+            <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+              {t("Lead time minimum days")}
+              <input name="leadTimeMinDays" value={form.leadTimeMinDays} onChange={handleChange} type="number" className="w-full px-3 py-2.5" />
+            </label>
+            <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+              {t("Lead time maximum days")}
+              <input name="leadTimeMaxDays" value={form.leadTimeMaxDays} onChange={handleChange} type="number" className="w-full px-3 py-2.5" />
+            </label>
+            <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+              {form.packagingUnit === "kg" ? t("20 FT container weight (kg)") : t("20 FT container quantity")}
+              <input name="flcQuantity20ft" value={form.flcQuantity20ft} onChange={handleChange} type="number" className="w-full px-3 py-2.5" />
+            </label>
+          </div>
+        </section>
 
-        <textarea name="description_en" value={form.description_en} onChange={handleChange} placeholder={t("English Description")} className="border px-3 py-2.5" />
+        <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-7">
+          <div className="mb-5 flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-sm font-black text-orange-800">05</span>
+            <h2 className="text-lg font-extrabold text-slate-900">{t("Identification & documents")}</h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+              {t("Country of origin")}
+              <input name="originCountry" value={form.originCountry} onChange={handleChange} className="w-full px-3 py-2.5" />
+            </label>
+            <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+              <span>{t("Product Code")} <span className="font-normal text-slate-400">({t("Optional")})</span></span>
+              <input name="hsCode" value={form.hsCode} onChange={handleChange} className="w-full px-3 py-2.5" />
+            </label>
+          </div>
+        </section>
 
-        <input name="basePrice" value={form.basePrice} onChange={handleChange} type="number" placeholder={t("السعر الأساسي")} className="border px-3 py-2.5" />
+        <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-7">
+          <div className="mb-5 flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-sm font-black text-teal-800">06</span>
+            <h2 className="text-lg font-extrabold text-slate-900">{t("Product images")}</h2>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <ImageUploader
+              label={t("Main product image")}
+              images={form.imageCover ? [{ url: formatImageUrl(form.imageCover), key: imageCoverKey }] : []}
+              files={coverFiles}
+              onFilesChange={(files) => {
+                setCoverFiles(files);
+                setUploadErrors((current) => ({ ...current, cover: "" }));
+              }}
+              onRemoveImage={() => removeProductImage("cover")}
+              uploading={loading || uploadingAsset === "cover"}
+              progress={uploadProgress}
+              error={uploadErrors.cover}
+            />
+            <ImageUploader
+              label={t("Product gallery images")}
+              images={galleryImages.map((url, index) => ({
+                url: formatImageUrl(url),
+                key: imageKeys[index] || "",
+              }))}
+              files={galleryFiles}
+              onFilesChange={(files) => {
+                setGalleryFiles(files);
+                setUploadErrors((current) => ({ ...current, gallery: "" }));
+              }}
+              onRemoveImage={(index) => removeProductImage("gallery", index)}
+              multiple
+              uploading={loading || uploadingAsset === "gallery"}
+              progress={uploadProgress}
+              error={uploadErrors.gallery}
+            />
+          </div>
+          <label className="mt-5 grid gap-1.5 text-sm font-semibold text-slate-700">
+            {t("Image URL (optional)")}
+            <input name="imageCover" value={form.imageCover} onChange={handleChange} placeholder={t("Paste an existing public image URL")} className="w-full px-3 py-2.5" />
+          </label>
+        </section>
 
-        <input name="priceAfterDiscount" value={form.priceAfterDiscount} onChange={handleChange} type="number" placeholder={t("بعد الخصم")} className="border px-3 py-2.5" />
-
-        <label className="flex items-center gap-3 rounded-xl border border-rose-100 bg-rose-50/60 p-4 text-sm text-slate-700">
-          <input
-            name="isOnSale"
-            type="checkbox"
-            checked={form.isOnSale}
-            onChange={(event) => setForm((current) => ({ ...current, isOnSale: event.target.checked }))}
-            className="h-4 w-4 accent-rose-700"
-          />
-          <span>
-            <span className="block font-bold text-rose-800">{t("Show SALE label")}</span>
-            <span className="mt-1 block text-xs text-slate-500">{t("This label appears on storefront product cards.")}</span>
-          </span>
-        </label>
-
-        <input name="quantity" value={form.quantity} onChange={handleChange} type="number" placeholder={t("الكمية")} className="border px-3 py-2.5" />
-
-        <label className="flex items-start gap-3 rounded-xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm text-slate-700">
+        <label className="flex items-start gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm text-slate-700 sm:p-5">
           <input
             name="isFeatured"
             type="checkbox"
@@ -300,88 +531,16 @@ export default function CreateProduct() {
           </span>
         </label>
 
-        <select
-          name="category"
-          value={form.category}
-          onChange={handleChange}
-          className="border px-3 py-2.5 text-gray-700"
-        >
-          <option value="">{t("اختر القسم (Category)")}</option>
-          {categories.map((cat) => (
-            <option key={cat._id} value={cat._id}>
-              {isArabic ? `${cat.name_ar} | ${cat.name_en}` : `${cat.name_en} | ${cat.name_ar}`}
-            </option>
-          ))}
-        </select>
-
-        <select
-          name="brand"
-          value={form.brand}
-          onChange={handleChange}
-          className="border px-3 py-2.5 text-gray-700"
-        >
-          <option value="">{t("No brand")}</option>
-          {brands.map((brand) => (
-            <option
-              key={brand._id}
-              value={brand._id}
-              disabled={brand.isActive === false && brand._id !== form.brand}
-            >
-              {isArabic ? `${brand.name_ar} | ${brand.name_en}` : `${brand.name_en} | ${brand.name_ar}`}
-              {brand.isActive === false ? ` (${t("Hidden")})` : ""}
-            </option>
-          ))}
-        </select>
-
-        <ImageUploader
-          label={t("Main product image")}
-          images={form.imageCover ? [{ url: formatImageUrl(form.imageCover), key: imageCoverKey }] : []}
-          files={coverFiles}
-          onFilesChange={(files) => {
-            setCoverFiles(files);
-            setUploadErrors((current) => ({ ...current, cover: "" }));
-          }}
-          onRemoveImage={() => removeProductImage("cover")}
-          uploading={loading || uploadingAsset === "cover"}
-          progress={uploadProgress}
-          error={uploadErrors.cover}
-        />
-
-        <ImageUploader
-          label={t("Product gallery images")}
-          images={galleryImages.map((url, index) => ({
-            url: formatImageUrl(url),
-            key: imageKeys[index] || "",
-          }))}
-          files={galleryFiles}
-          onFilesChange={(files) => {
-            setGalleryFiles(files);
-            setUploadErrors((current) => ({ ...current, gallery: "" }));
-          }}
-          onRemoveImage={(index) => removeProductImage("gallery", index)}
-          multiple
-          uploading={loading || uploadingAsset === "gallery"}
-          progress={uploadProgress}
-          error={uploadErrors.gallery}
-        />
-
-        <label className="block space-y-1 text-sm font-medium text-slate-700">
-          {t("Image URL (optional)")}
-          <input name="imageCover" value={form.imageCover} onChange={handleChange} placeholder={t("Paste an existing public image URL")} className="w-full border px-3 py-2.5" />
-        </label>
-
-        <button
-          disabled={loading || Boolean(uploadingAsset)}
-          className="rounded-xl bg-[var(--primary)] py-3 font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {loading ? t("جاري الحفظ...") : isEdit ? t("تحديث المنتج") : t("إنشاء المنتج")}
-        </button>
-
+        <div className="flex justify-end rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm sm:p-4">
+          <button
+            type="submit"
+            disabled={loading || Boolean(uploadingAsset)}
+            className="w-full rounded-xl bg-[var(--primary)] px-8 py-3 font-bold text-white shadow-sm transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+          >
+            {loading ? t("جاري الحفظ...") : isEdit ? t("تحديث المنتج") : t("إنشاء المنتج")}
+          </button>
+        </div>
       </form>
-      
-      <div>
-       
-      </div>
     </div>
   );
 }

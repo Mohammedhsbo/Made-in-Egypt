@@ -30,6 +30,7 @@ function getAdminBreadcrumbs(pathname) {
     return [adminRoot, { to: "/admin/managebrands", label: "Brand Management" }, { label: "Edit brand" }];
   }
   if (pathname === "/admin/allcuppons") return [adminRoot, { label: "Coupons" }];
+  if (pathname === "/admin/settings/whatsapp") return [adminRoot, { label: "WhatsApp Configuration" }];
   if (pathname === "/admin/create-cuppons") {
     return [adminRoot, { to: "/admin/allcuppons", label: "Coupons" }, { label: "Create coupon" }];
   }

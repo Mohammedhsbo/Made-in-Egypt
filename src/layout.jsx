@@ -8,10 +8,6 @@ function getStoreBreadcrumbs(pathname) {
   const home = { to: '/', label: 'Home' };
 
   if (pathname === '/') return null;
-  if (pathname === '/cart') return [home, { label: 'Shopping cart' }];
-  if (pathname === '/checkout') {
-    return [home, { to: '/cart', label: 'Shopping cart' }, { label: 'Checkout' }];
-  }
   if (pathname === '/clothes') return [home, { label: 'الملابس' }];
   if (pathname === '/shoes') return [home, { label: 'الأحذية' }];
   if (pathname === '/perfumes') return [home, { label: 'العطور' }];
@@ -24,6 +20,15 @@ function getStoreBreadcrumbs(pathname) {
   }
   if (/^\/brands\/[^/]+$/.test(pathname)) {
     return [home, { label: 'Brands' }];
+  }
+  const customerServicePages = {
+    '/customer-service/about': 'About us',
+    '/customer-service/privacy-policy': 'Privacy policy',
+    '/customer-service/terms-and-conditions': 'Terms and conditions',
+    '/customer-service/return-policy': 'Return policy',
+  };
+  if (customerServicePages[pathname]) {
+    return [home, { to: '/customer-service/about', label: 'Customer service' }, { label: customerServicePages[pathname] }];
   }
   if (pathname === '/login' || pathname === '/register') {
     return [home, { label: pathname === '/login' ? 'Login' : 'Register' }];

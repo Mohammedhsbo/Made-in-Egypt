@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Layers, Megaphone, Package, ShoppingCart, Tag, Tags, X } from "lucide-react";
+import { Layers, Megaphone, MessageCircle, Package, ShoppingCart, Tag, Tags, X } from "lucide-react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "@/context/language.context";
@@ -11,6 +11,7 @@ const navigation = [
   { to: "/admin/managecategories", label: "إدارة التصنيفات", icon: Layers, key: "categories" },
   { to: "/admin/managebrands", label: "Brand Management", icon: Tags, key: "brands" },
   { to: "/admin/allcuppons", label: "إدارة الكوبونات", icon: Tag, key: "coupons" },
+  { to: "/admin/settings/whatsapp", label: "WhatsApp Configuration", icon: MessageCircle, key: "whatsapp" },
 ];
 
 function isNavigationItemActive(item, pathname) {
@@ -24,6 +25,7 @@ function isNavigationItemActive(item, pathname) {
   }
   if (item.key === "brands") return pathname.startsWith(item.to);
   if (item.key === "coupons") return pathname.includes("cuppon");
+  if (item.key === "whatsapp") return pathname.startsWith("/admin/settings/whatsapp");
   return pathname === item.to || pathname.startsWith(`${item.to}/`);
 }
 

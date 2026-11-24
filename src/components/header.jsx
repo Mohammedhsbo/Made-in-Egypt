@@ -1,16 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Logo from "../assets/logo.png";
-import { ChevronDown, Globe, LogIn, LogOut, Search, ShoppingCart, User, UserPlus } from "lucide-react";
+import { ChevronDown, Globe, LogIn, LogOut, Search, User, UserPlus } from "lucide-react";
 import { useSearch } from "../context/searchContext";
 import { useAuth } from "../context/auth.context";
-import { useCart } from "../context/cartContext";
 import { useLanguage } from "@/context/language.context";
 
 export default function Header() {
   const { searchTerm, setSearchTerm } = useSearch();
   const { user, logout } = useAuth();
-  const { cart } = useCart();
   const { t, isArabic, toggleLanguage } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -33,8 +31,6 @@ export default function Header() {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
-
-  const cartItemsCount = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
 
   const handleLogout = () => {
     logout();
@@ -208,14 +204,6 @@ export default function Header() {
             )}
           </div>
 
-          <Link to="/cart" aria-label={t("Shopping cart")} className="relative flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/10">
-            <ShoppingCart size={22} className="text-white" />
-            {cartItemsCount > 0 && (
-              <span className="absolute right-0 top-0 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[var(--primary)] bg-red-500 text-[10px] font-bold text-white">
-                {cartItemsCount > 99 ? "99+" : cartItemsCount}
-              </span>
-            )}
-          </Link>
         </div>
       </div>
 
